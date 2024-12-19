@@ -1,0 +1,60 @@
+{
+  "originHash" : "fb3b7783aaec8e20a5169696f96794202c42b5b827c53526866b98ee9d9d9f17",
+  "pins" : [
+    {
+      "identity" : "anycodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flight-School/AnyCodable",
+      "state" : {
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "0.6.7"
+      }
+    },
+    {
+      "identity" : "appbase",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/seddiqiholding/AppBase.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "62b08adba4167fecc9e0bb6c8116802ff528f76b"
+      }
+    },
+    {
+      "identity" : "barcodescanner",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hyperoslo/BarcodeScanner",
+      "state" : {
+        "revision" : "059cd71c4e3b9efc8d7e42fa1948bf572471b448",
+        "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "nvactivityindicatorview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ninjaprox/NVActivityIndicatorView.git",
+      "state" : {
+        "revision" : "121455c4e630fcb95aaefd7e4257b0c2e3cfe6d5",
+        "version" : "5.2.0"
+      }
+    },
+    {
+      "identity" : "svprogresshud",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SVProgressHUD/SVProgressHUD.git",
+      "state" : {
+        "revision" : "c33f7c775ba7feea6047a1fc3257f2e5863b44f7",
+        "version" : "2.3.1"
+      }
+    },
+    {
+      "identity" : "swiftentrykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/huri000/SwiftEntryKit.git",
+      "state" : {
+        "revision" : "5ad36cccf0c4b9fea32f4e9b17a8e38f07563ef0",
+        "version" : "2.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}
