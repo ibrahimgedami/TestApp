@@ -78,6 +78,7 @@ struct Invoice {
 }
 
 struct InvoiceView: View {
+
     @State private var invoice = Invoice(
         amount: 1000.0,
         payments: [],
