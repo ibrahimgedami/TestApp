@@ -7,36 +7,28 @@
 
 import SwiftUI
 
-struct PaymentType: Codable, Hashable, Equatable {
+struct PaymentType: Codable, Hashable, Identifiable {
     
+    var id: String { cd ?? UUID().uuidString }
     let cd: String?
     let name: String?
     let locationCd: String?
     let accountCode: String?
     let glCode: String?
     let txnCode: String?
-    
-}
 
-enum PaymentMethod: String, CaseIterable, Identifiable {
-    
-    var id: String { self.rawValue }
-    
-    case cash
-    case creditCard
-    
 }
 
 struct Payment: Identifiable {
-    
+
     let id = UUID()
-    var method: PaymentMethod
+    var type: PaymentType
     var amount: Double
     var foreignAmount: Double?
     var exchangeRate: Double?
-    
-    init(method: PaymentMethod, amount: Double, foreignAmount: Double? = nil, exchangeRate: Double? = nil) {
-        self.method = method
+
+    init(type: PaymentType, amount: Double, foreignAmount: Double? = nil, exchangeRate: Double? = nil) {
+        self.type = type
         self.amount = amount
         self.foreignAmount = foreignAmount
         self.exchangeRate = exchangeRate
@@ -78,9 +70,9 @@ struct Invoice {
         netAmountIncludingVAT - totalPaid
     }
     
-    mutating func addPayment(method: PaymentMethod, amount: Double, foreignAmount: Double? = nil, exchangeRate: Double? = nil) {
+    mutating func addPayment(type: PaymentType, amount: Double, foreignAmount: Double? = nil, exchangeRate: Double? = nil) {
         guard amount > 0 else { return }
-        payments.append(Payment(method: method, amount: amount, foreignAmount: foreignAmount, exchangeRate: exchangeRate))
+        payments.append(Payment(type: type, amount: amount, foreignAmount: foreignAmount, exchangeRate: exchangeRate))
     }
     
 }
@@ -145,24 +137,17 @@ struct InvoiceView: View {
     
     private var paymentSection: some View {
         VStack(spacing: 10) {
-            Text("Add Payment")
-                .font(.headline)
+            Text("Add Payment").font(.headline)
             
-            Picker("Payment Method", selection: $newPaymentType) {
-                ForEach(paymentTypes, id: \.cd) { paymentType in
-                    Text(paymentType.name ?? "").tag(paymentType as PaymentType?)
+            Picker("Payment Type", selection: $newPaymentType) {
+                ForEach(paymentTypes) { type in
+                    Text(type.name ?? "").tag(type as PaymentType?)
                 }
             }
-            .pickerStyle(.wheel)
+            .pickerStyle(WheelPickerStyle())
             .onChange(of: newPaymentType) { _, newValue in
                 updateCurrency(for: newValue)
             }
-//            Picker("Payment Method", selection: $newPaymentType) {
-//                ForEach(paymentTypes, id: \.cd) { paymentType in
-//                    Text(paymentType.name ?? "").tag(paymentType.cd)
-//                }
-//            }
-//            .pickerStyle(.wheel)
             
             HStack {
                 TextField(selectedCurrency == "AED" ? "Amount" : "Foreign Amount", text: $newForeignAmount)
@@ -173,31 +158,26 @@ struct InvoiceView: View {
                     }
             }
             
-            Picker("Select Currency", selection: $selectedCurrency) {
+            Picker("Currency", selection: $selectedCurrency) {
                 ForEach(foreignCurrencies.keys.sorted(), id: \.self) { currency in
                     Text(currency).tag(currency)
                 }
             }
             
-            Text("Conversion Rate: \(foreignCurrencies[selectedCurrency] ?? 1.0, specifier: "%.1f") AED")
+            Text("Exchange Rate: \(foreignCurrencies[selectedCurrency] ?? 1.0, specifier: "%.2f")")
             
             if !newForeignAmount.isEmpty {
-                Text("Equivalent in AED: \(calculatedAEDAmount, specifier: "%.1f")")
-                    .foregroundColor(.gray)
+                Text("AED Equivalent: \(calculatedAEDAmount, specifier: "%.2f")").foregroundColor(.gray)
             }
             
-            Button(action: addPayment) {
-                Text("Add")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
+            Button("Add Payment") { addPayment() }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(canAddPayment ? Color.blue : .gray)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+                .disabled(!canAddPayment)
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
     }
     
     private var paymentsList: some View {
@@ -205,9 +185,9 @@ struct InvoiceView: View {
             Text("Payments")
                 .font(.headline)
             
-            ForEach(invoice.payments, id: \.method) { payment in
+            ForEach(invoice.payments, id: \.type) { payment in
                 HStack {
-                    Text(payment.method.rawValue.capitalized)
+                    Text(payment.type.cd?.capitalized ?? "--")
                     Spacer()
                     Text("\(payment.amount, specifier: "%.1f") AED")
                     if let foreignAmount = payment.foreignAmount,
@@ -233,47 +213,46 @@ struct InvoiceView: View {
     }
     
     private func addPayment() {
-        guard let foreignAmountInSelectedCurrency = Double(newForeignAmount), foreignAmountInSelectedCurrency > 0,
-              let newPaymentType = newPaymentType else { return }
+        guard let type = newPaymentType,
+              let foreignAmount = Double(newForeignAmount),
+              foreignAmount > 0 else { return }
         
-        let selectedExchangeRate = foreignCurrencies[selectedCurrency] ?? 1.0
-        let amountInAED = foreignAmountInSelectedCurrency * selectedExchangeRate
-        if let value = newPaymentType.cd?.lowercased() {
-            invoice.addPayment(method: PaymentMethod(rawValue: value) ?? .cash, amount: amountInAED, foreignAmount: foreignAmountInSelectedCurrency, exchangeRate: selectedExchangeRate)
-        }
+        let exchangeRate = foreignCurrencies[selectedCurrency] ?? 1.0
+        let amount = foreignAmount * exchangeRate
+        
+        invoice.addPayment(type: type, amount: amount, foreignAmount: foreignAmount, exchangeRate: exchangeRate)
         
         newForeignAmount = ""
         calculatedAEDAmount = 0.0
     }
     
     private func updateAEDAmount(from foreignAmount: String) {
-        guard let foreignAmountValue = Double(foreignAmount), foreignAmountValue > 0 else {
+        guard let value = Double(foreignAmount) else {
             calculatedAEDAmount = 0.0
             return
         }
-        let selectedExchangeRate = foreignCurrencies[selectedCurrency] ?? 1.0
-        calculatedAEDAmount = foreignAmountValue * selectedExchangeRate
+        calculatedAEDAmount = value * (foreignCurrencies[selectedCurrency] ?? 1.0)
     }
     
     private func updateCurrency(for paymentType: PaymentType?) {
-        switch paymentType?.name {
-        case "Cash", "Credit Card", "REFUND":
-            selectedCurrency = "AED"
-        case "FC (Euro)":
-            selectedCurrency = "EUR"
-        case "FC (GB Pound)":
-            selectedCurrency = "GBP"
-        case "FC (US$)":
-            selectedCurrency = "USD"
-        default:
-            selectedCurrency = "AED"
-        }
+        selectedCurrency = {
+            switch paymentType?.name {
+            case "FC (Euro)": return "EUR"
+            case "FC (GB Pound)": return "GBP"
+            case "FC (US$)": return "USD"
+            default: return "AED"
+            }
+        }()
     }
     
     private func deletePayment(_ payment: Payment) {
         if let index = invoice.payments.firstIndex(where: { $0.id == payment.id }) {
             invoice.payments.remove(at: index)
         }
+    }
+    
+    private var canAddPayment: Bool {
+        invoice.remainingAmount > 0
     }
 }
 
@@ -474,52 +453,52 @@ func loadPaymentTypes() -> [PaymentType] {
 /*
  
  private var paymentSection: some View {
-     VStack(spacing: 10) {
-         Text("Add Payment")
-             .font(.headline)
-         
-         Picker("Payment Method", selection: $newPaymentMethod) {
-             ForEach(paymentTypes, id: \.cd) { paymentType in
-                 Text(paymentType.name ?? "").tag(paymentType.cd)
-             }
-         }
-         .pickerStyle(.wheel)
-         
-         HStack {
-             TextField(selectedCurrency == "AED" ? "Amount" : "Foreign Amount", text: $newForeignAmount)
-                 .keyboardType(.decimalPad)
-                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                 .onChange(of: newForeignAmount) { _, newValue in
-                     updateAEDAmount(from: newValue)
-                 }
-         }
-         
-         Picker("Select Currency", selection: $selectedCurrency) {
-             ForEach(foreignCurrencies.keys.sorted(), id: \.self) { currency in
-                 Text(currency).tag(currency)
-             }
-         }
-         
-         Text("Conversion Rate: \(foreignCurrencies[selectedCurrency]!, specifier: "%.1f") AED")
-         
-         if !newForeignAmount.isEmpty {
-             Text("Equivalent in AED: \(calculatedAEDAmount, specifier: "%.1f")")
-                 .foregroundColor(.gray)
-         }
-         
-         Button(action: addPayment) {
-             Text("Add")
-                 .frame(maxWidth: .infinity)
-                 .padding()
-                 .background(Color.blue)
-                 .foregroundColor(.white)
-                 .cornerRadius(8)
-         }
-     }
-     .padding()
-     .background(Color(.systemGray6))
-     .cornerRadius(10)
+ VStack(spacing: 10) {
+ Text("Add Payment")
+ .font(.headline)
+ 
+ Picker("Payment Method", selection: $newPaymentMethod) {
+ ForEach(paymentTypes, id: \.cd) { paymentType in
+ Text(paymentType.name ?? "").tag(paymentType.cd)
  }
-
+ }
+ .pickerStyle(.wheel)
+ 
+ HStack {
+ TextField(selectedCurrency == "AED" ? "Amount" : "Foreign Amount", text: $newForeignAmount)
+ .keyboardType(.decimalPad)
+ .textFieldStyle(RoundedBorderTextFieldStyle())
+ .onChange(of: newForeignAmount) { _, newValue in
+ updateAEDAmount(from: newValue)
+ }
+ }
+ 
+ Picker("Select Currency", selection: $selectedCurrency) {
+ ForEach(foreignCurrencies.keys.sorted(), id: \.self) { currency in
+ Text(currency).tag(currency)
+ }
+ }
+ 
+ Text("Conversion Rate: \(foreignCurrencies[selectedCurrency]!, specifier: "%.1f") AED")
+ 
+ if !newForeignAmount.isEmpty {
+ Text("Equivalent in AED: \(calculatedAEDAmount, specifier: "%.1f")")
+ .foregroundColor(.gray)
+ }
+ 
+ Button(action: addPayment) {
+ Text("Add")
+ .frame(maxWidth: .infinity)
+ .padding()
+ .background(Color.blue)
+ .foregroundColor(.white)
+ .cornerRadius(8)
+ }
+ }
+ .padding()
+ .background(Color(.systemGray6))
+ .cornerRadius(10)
+ }
+ 
  
  */
