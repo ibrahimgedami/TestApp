@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AppBase
 
 struct PaymentType: Codable, Hashable, Identifiable {
     
@@ -78,7 +79,7 @@ struct Invoice {
 }
 
 struct InvoiceView: View {
-
+    
     @State private var invoice = Invoice(
         amount: 1000.0,
         payments: [],
@@ -104,16 +105,30 @@ struct InvoiceView: View {
     let paymentTypes = loadPaymentTypes()
     
     var body: some View {
-        NavigationView {
+        if !Device.isiPadDevice {
+            NavigationView {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        summarySection
+                        paymentSection
+                        paymentsList
+                    }
+                    .padding()
+                }
+                .navigationTitle("Invoice")
+            }
+        } else {
             ScrollView {
                 VStack(spacing: 20) {
-                    summarySection
-                    paymentSection
+                    HStack(spacing: 50) {
+                        summarySection
+                        Spacer()
+                        paymentSection
+                    }
                     paymentsList
                 }
                 .padding()
             }
-            .navigationTitle("Invoice")
         }
     }
     
