@@ -141,9 +141,11 @@ struct InvoiceView: View {
             
             Picker("Payment Type", selection: $newPaymentType) {
                 ForEach(paymentTypes) { type in
-                    Text(type.name ?? "").tag(type as PaymentType?)
+                    Text(type.name ?? "")
+                        .tag(type as PaymentType?)
                 }
             }
+            .frame(height: 100)
             .pickerStyle(WheelPickerStyle())
             .onChange(of: newPaymentType) { _, newValue in
                 updateCurrency(for: newValue)
@@ -169,21 +171,31 @@ struct InvoiceView: View {
             if !newForeignAmount.isEmpty {
                 Text("AED Equivalent: \(calculatedAEDAmount, specifier: "%.2f")").foregroundColor(.gray)
             }
-            
-            Button("Add Payment") { addPayment() }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(canAddPayment ? Color.blue : .gray)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .disabled(!canAddPayment)
+            HStack {
+                Button {
+                    addPayment()
+                } label: {
+                    Text("Add Payment")
+                        .frame(height: 10, alignment: .leading)
+                        .padding()
+                        .background(canAddPayment && !newForeignAmount.isEmpty ? Color.blue : .gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                        .disabled(!canAddPayment && !newForeignAmount.isEmpty)
+                }
+                
+                Spacer()
+            }
         }
     }
     
     private var paymentsList: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Payments")
-                .font(.headline)
+            HStack {
+                Text("Payments")
+                    .font(.headline)
+                Spacer()
+            }
             
             ForEach(invoice.payments, id: \.type) { payment in
                 HStack {
