@@ -8,7 +8,7 @@
 import SwiftUI
 import AppBase
 
-struct ContentView: View {
+struct NavigationContentView: View {
     
     @State var menuString = ["Profile", "Home", "Settings", "Notifications"]
     @State var xAxis: CGFloat = 0

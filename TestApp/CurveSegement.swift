@@ -9,39 +9,59 @@ import SwiftUI
 import PDFKit
 import AppBase
 
+extension String {
+    /// Checks if the string matches the "number/number" format.
+    func isValidNumberFormat() -> Bool {
+        let regex = #"^\d+/\d+$"#
+        return self.range(of: regex, options: .regularExpression) != nil
+    }
+
+}
+
 struct PDFUIViewWrapperContentView: View {
     
     @State private var pdfHeight: CGFloat = 0
     @State private var disableScroll = true
+    @State private var shareButtonFrame: CGRect = .zero
     @State private var orientation: UIDeviceOrientation = UIDevice.current.orientation
-    let urlString = "http://172.150.2.67/web_services/sws/jobcard/V1/jobcards/2024/12/2024-12-04/149001723/job_card_order_149001723.pdf"
+    let pdfURL: URL
+    
+    public init(pdfURL: URL) {
+        self.pdfURL = pdfURL
+    }
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack {
-                PDFUIViewWrapper(pdfURL: URL(string: urlString)!)
-                    .frame(height: pdfHeight)
-                    .disabled(disableScroll)
-                    .gesture(
-                        DragGesture().onChanged { _ in }
-                    )
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                buttons
             }
-        }
-        .onAppear {
-            loadPDF()
-            startOrientationObserver()
-        }
-        .onDisappear {
-            removeOrientationObserver()
-        }
-        .onChange(of: orientation) { _, _ in
-            loadPDF()
+            .frame(height: 60)
+            ScrollView(showsIndicators: false) {
+                VStack {
+                    PDFUIViewWrapper(pdfURL: pdfURL)
+                        .frame(height: pdfHeight)
+                        .disabled(disableScroll)
+                        .gesture(
+                            DragGesture().onChanged { _ in }
+                        )
+                }
+            }
+            .onAppear {
+                loadPDF()
+                startOrientationObserver()
+            }
+            .onDisappear {
+                removeOrientationObserver()
+            }
+            .onChange(of: orientation) { _, _ in
+                loadPDF()
+            }
         }
     }
     
     private func loadPDF() {
-        if let url = URL(string: urlString),
-           let document = PDFDocument(url: url) {
+        if let document = PDFDocument(url: pdfURL) {
             var totalHeight: CGFloat = 0
             for pageIndex in 0..<document.pageCount {
                 if let page = document.page(at: pageIndex) {
@@ -82,11 +102,85 @@ struct PDFUIViewWrapperContentView: View {
     private func removeOrientationObserver() {
         NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
     }
-
+    
+    private func sharePDF() {
+        let activityVC = UIActivityViewController(activityItems: [pdfURL], applicationActivities: nil)
+        
+        if !shareButtonFrame.isEmpty {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let topController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+                activityVC.popoverPresentationController?.sourceView = topController.view
+                activityVC.popoverPresentationController?.sourceRect = shareButtonFrame
+            }
+        } else {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let topController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+                activityVC.popoverPresentationController?.sourceView = topController.view
+                activityVC.popoverPresentationController?.sourceRect = CGRect(x: topController.view.bounds.midX, y: topController.view.bounds.midY, width: 0, height: 0)
+            }
+        }
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let topController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+            topController.present(activityVC, animated: true, completion: nil)
+        }
+    }
+    
+    private func printPDF() {
+        let printController = UIPrintInteractionController.shared
+        if let document = PDFDocument(url: pdfURL) {
+            let printInfo = UIPrintInfo.printInfo()
+            printInfo.outputType = .general
+            printController.printInfo = printInfo
+            printController.printingItem = document.dataRepresentation()
+            printController.present(animated: true, completionHandler: nil)
+        }
+    }
+    
+    @ViewBuilder
+    private var buttons: some View {
+        VStack {
+            HStack(spacing: 12) {
+                ShareButtonRepresentable {
+                    sharePDF()
+                }
+                .padding()
+                .frame(width: 35, height: 35)
+                .foregroundStyle(.white)
+                .background(GeometryReader { geometry in
+                    Circle()
+                        .fill(mainColor)
+                        .onAppear {
+                            self.shareButtonFrame = geometry.frame(in: .global)
+                        }
+                })
+                
+                Button(action: {
+                    self.printPDF()
+                }) {
+                    Image(systemName: "printer")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .padding()
+                        .frame(width: 50, height: 50)
+                        .background(
+                            Circle()
+                                .fill(mainColor)
+                                .frame(width: 35, height: 35)
+                        )
+                        .foregroundStyle(.white)
+                }
+            }
+            .padding()
+        }
+        .padding(.top, 20)
+        .frame(maxWidth: .infinity, alignment: .topTrailing)
+    }
+    
 }
 
 struct PDFUIViewWrapper: View {
-
+    
     var pdfURL: URL
     @State private var pdfView = PDFView()
     
@@ -107,10 +201,11 @@ struct PDFUIViewWrapper: View {
             pdfView.autoScales = true
         }
     }
+    
 }
 
 struct PDFUIView: UIViewRepresentable {
-
+    
     @Binding var pdfView: PDFView
     var url: URL
     
@@ -125,5 +220,38 @@ struct PDFUIView: UIViewRepresentable {
             }
         }
     }
+    
+}
 
+struct ShareButtonRepresentable: UIViewRepresentable {
+    
+    var action: () -> Void
+    
+    func makeUIView(context: Context) -> UIButton {
+        let button = UIButton(type: .system)
+        button.tintColor = .white
+        button.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.addTarget(context.coordinator, action: #selector(Coordinator.didTap), for: .touchUpInside)
+        return button
+    }
+    
+    func updateUIView(_ uiView: UIButton, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(action: action)
+    }
+    
+    class Coordinator: NSObject {
+        var action: () -> Void
+        
+        init(action: @escaping () -> Void) {
+            self.action = action
+        }
+        
+        @objc func didTap() {
+            action()
+        }
+    }
+    
 }

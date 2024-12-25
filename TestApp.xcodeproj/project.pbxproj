@@ -9,22 +9,27 @@
 /* Begin PBXBuildFile section */
 		DD0E3E762CFDFF0A005ECD21 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0E3E752CFDFF0A005ECD21 /* CurveSegement.swift */; };
 		DD0E3E792D002F5B005ECD21 /* AppBase in Frameworks */ = {isa = PBXBuildFile; productRef = DD0E3E782D002F5B005ECD21 /* AppBase */; };
+		DD2CA2EE2D1BD325001259CC /* JobCardDeliveryInvoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2CA2ED2D1BD325001259CC /* JobCardDeliveryInvoice.swift */; };
 		DD3DCB4F2CC66D600068DA80 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DCB4E2CC66D600068DA80 /* MainView.swift */; };
 		DDB902F82BF36CCD00A2FF5A /* TestAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB902F72BF36CCD00A2FF5A /* TestAppApp.swift */; };
 		DDB902FC2BF36CCF00A2FF5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDB902FB2BF36CCF00A2FF5A /* Assets.xcassets */; };
 		DDB903002BF36CCF00A2FF5A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDB902FF2BF36CCF00A2FF5A /* Preview Assets.xcassets */; };
+		DDDF71972D1807A10063EF5A /* CombineNetwork in Frameworks */ = {isa = PBXBuildFile; productRef = DDDF71962D1807A10063EF5A /* CombineNetwork */; };
+		DDF2E0D82D1AC6200045C201 /* Overlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF2E0D72D1AC6200045C201 /* Overlay.swift */; };
 		DDFB69972D086C1D0004ED52 /* PDFViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFB69962D086C1D0004ED52 /* PDFViewWrapper.swift */; };
 		DDFDD4D82D08158E00990B31 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFDD4D72D08158E00990B31 /* Alert.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		DD0E3E752CFDFF0A005ECD21 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
+		DD2CA2ED2D1BD325001259CC /* JobCardDeliveryInvoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobCardDeliveryInvoice.swift; sourceTree = "<group>"; };
 		DD3DCB4E2CC66D600068DA80 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		DDB902F42BF36CCD00A2FF5A /* TestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDB902F72BF36CCD00A2FF5A /* TestAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAppApp.swift; sourceTree = "<group>"; };
 		DDB902FB2BF36CCF00A2FF5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DDB902FD2BF36CCF00A2FF5A /* TestApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TestApp.entitlements; sourceTree = "<group>"; };
 		DDB902FF2BF36CCF00A2FF5A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DDF2E0D72D1AC6200045C201 /* Overlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Overlay.swift; path = ../../../../../../Applications/Overlay.swift; sourceTree = "<group>"; };
 		DDFB69962D086C1D0004ED52 /* PDFViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFViewWrapper.swift; sourceTree = "<group>"; };
 		DDFDD4D72D08158E00990B31 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -35,6 +40,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD0E3E792D002F5B005ECD21 /* AppBase in Frameworks */,
+				DDDF71972D1807A10063EF5A /* CombineNetwork in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,6 +82,8 @@
 			isa = PBXGroup;
 			children = (
 				DDB902FF2BF36CCF00A2FF5A /* Preview Assets.xcassets */,
+				DDF2E0D72D1AC6200045C201 /* Overlay.swift */,
+				DD2CA2ED2D1BD325001259CC /* JobCardDeliveryInvoice.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -98,6 +106,7 @@
 			name = TestApp;
 			packageProductDependencies = (
 				DD0E3E782D002F5B005ECD21 /* AppBase */,
+				DDDF71962D1807A10063EF5A /* CombineNetwork */,
 			);
 			productName = TestApp;
 			productReference = DDB902F42BF36CCD00A2FF5A /* TestApp.app */;
@@ -129,6 +138,7 @@
 			mainGroup = DDB902EB2BF36CCD00A2FF5A;
 			packageReferences = (
 				DD0E3E772D002F5B005ECD21 /* XCRemoteSwiftPackageReference "AppBase" */,
+				DDDF71952D1807A10063EF5A /* XCRemoteSwiftPackageReference "CombineNetwork" */,
 			);
 			productRefGroup = DDB902F52BF36CCD00A2FF5A /* Products */;
 			projectDirPath = "";
@@ -158,8 +168,10 @@
 			files = (
 				DDB902F82BF36CCD00A2FF5A /* TestAppApp.swift in Sources */,
 				DD0E3E762CFDFF0A005ECD21 /* CurveSegement.swift in Sources */,
+				DD2CA2EE2D1BD325001259CC /* JobCardDeliveryInvoice.swift in Sources */,
 				DDFDD4D82D08158E00990B31 /* Alert.swift in Sources */,
 				DD3DCB4F2CC66D600068DA80 /* MainView.swift in Sources */,
+				DDF2E0D82D1AC6200045C201 /* Overlay.swift in Sources */,
 				DDFB69972D086C1D0004ED52 /* PDFViewWrapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -389,6 +401,14 @@
 				kind = branch;
 			};
 		};
+		DDDF71952D1807A10063EF5A /* XCRemoteSwiftPackageReference "CombineNetwork" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/seddiqiholding/CombineNetwork.git";
+			requirement = {
+				branch = development;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -396,6 +416,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DD0E3E772D002F5B005ECD21 /* XCRemoteSwiftPackageReference "AppBase" */;
 			productName = AppBase;
+		};
+		DDDF71962D1807A10063EF5A /* CombineNetwork */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DDDF71952D1807A10063EF5A /* XCRemoteSwiftPackageReference "CombineNetwork" */;
+			productName = CombineNetwork;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,6 +1,15 @@
 {
-  "originHash" : "fb3b7783aaec8e20a5169696f96794202c42b5b827c53526866b98ee9d9d9f17",
+  "originHash" : "29f13033780c14a578d6c38820741b0cc4a6e1663541e4e038cbd1a412b77aee",
   "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "state" : {
+        "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
+        "version" : "5.10.2"
+      }
+    },
     {
       "identity" : "anycodable",
       "kind" : "remoteSourceControl",
@@ -16,7 +25,7 @@
       "location" : "https://github.com/seddiqiholding/AppBase.git",
       "state" : {
         "branch" : "main",
-        "revision" : "62b08adba4167fecc9e0bb6c8116802ff528f76b"
+        "revision" : "f56f5ee768f86e22a3e43abfdb16556b319e3721"
       }
     },
     {
@@ -26,6 +35,15 @@
       "state" : {
         "revision" : "059cd71c4e3b9efc8d7e42fa1948bf572471b448",
         "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "combinenetwork",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/seddiqiholding/CombineNetwork.git",
+      "state" : {
+        "branch" : "development",
+        "revision" : "f71b79555a0485b2c8a5d015276ac57860948867"
       }
     },
     {

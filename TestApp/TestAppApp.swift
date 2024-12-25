@@ -6,43 +6,50 @@
 //
 
 import SwiftUI
+import AppBase
+import CombineNetwork
+
+public struct MockedToken {
+    
+    static func mockData() -> Token? {
+        let model = mockSuccessCase()?.content
+        return model
+    }
+    
+    static private func mockSuccessCase() -> BaseResponse<Token>? {
+        guard let model = FileHelper.shared.decodeJSONFromFile(filename: "R.file.branchAuthJsonJson.name", as: BaseResponse<Token>.self) else { return nil }
+        return model
+    }
+    
+    static func mockFailureCase() -> BaseResponse<Token>? {
+        let jsonString = """
+        {
+            "status": 1003,
+            "message": "Ref.#403_1-PARAM003\\nLocation username is mandatory.",
+            "content": null,
+            "pagination": null,
+            "error": {
+                "code": "PARAM003",
+                "message": "Location username is mandatory.",
+                "reason": "Location username is mandatory."
+            }
+        }
+        """
+        guard let model = FileHelper.shared.decodeJSONFromString(jsonString: jsonString, as: BaseResponse<Token>.self) else {
+            debugPrint("Failed to decode JSON string")
+            return nil
+        }
+        return model
+    }
+    
+}
 
 @main
 struct TestAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            PDFUIViewWrapperContentView()
-        }
-    }
-    
-}
-
-
-struct ContainerView: View {
-    
-    @State private var pdfContentHeight: CGFloat = 0
-    
-    var body: some View {
-        VStack {
-            VStack(spacing: 0) {
-                GeometryReader { metrics in
-                    Text("PDF View")
-                        .frame(width: metrics.size.width, height: 50)
-                }
-                .frame(height: 50)
-                .padding(.bottom, 70)
-                
-                ScrollView {
-                    VStack {
-                        PDFViewerView(
-                            pdfURL: URL(string: "http://172.150.2.67/web_services/sws/jobcard/V1/jobcards/2024/12/2024-12-04/149001723/job_card_order_149001723.pdf")!,
-                            contentHeight: $pdfContentHeight
-                        )
-                    }
-                    .padding(.horizontal)
-                }
-            }
+            InvoiceView()
         }
     }
     
