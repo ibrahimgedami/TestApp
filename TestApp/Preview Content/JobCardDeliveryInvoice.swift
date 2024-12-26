@@ -85,6 +85,9 @@ struct Invoice {
 
 struct InvoiceView: View {
     
+    @State private var isShowingSignatureView = false
+    @State private var signatureImage: UIImage? = nil
+    
     @State private var invoice = Invoice(
         amount: 350,
         payments: [],
@@ -131,6 +134,30 @@ struct InvoiceView: View {
                         paymentSection
                     }
                     paymentsList
+                    
+                    Button(action: {
+                        isShowingSignatureView.toggle()
+                    }) {
+                        if let image = signatureImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 200, height: 100) // You can adjust the size as needed
+                        } else {
+                            // If no signature is captured, show the default button text
+                            Text("Add Signature")
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding()
+                    .sheet(isPresented: $isShowingSignatureView) {
+                        // Present the signature view as a sheet
+                        SignatureView(isOpened: $isShowingSignatureView, signatureImage: $signatureImage)
+                    }
+
                 }
                 .padding()
             }
@@ -160,17 +187,38 @@ struct InvoiceView: View {
         VStack(spacing: 5) {
             Text("Add Payment").font(.headline)
             
-            Picker("Payment Type", selection: $newPaymentType) {
-                ForEach(paymentTypes, id: \.cd) { type in
-                    Text(type.name ?? "Unknown Type").tag(type as PaymentType?)
+            Button(action: {
+                isShowingPaymentList.toggle()
+            }) {
+                HStack {
+                    Text(newPaymentType?.name ?? "Select Payment Type")
+                    Spacer()
+                    Image(systemName: "chevron.down")
                 }
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+            .sheet(isPresented: $isShowingPaymentList) {
+                VStack {
+                    Text("Select Payment Type")
+                        .font(.headline)
+                        .padding()
+                    
+                    List(paymentTypes, id: \.cd) { type in
+                        Button(action: {
+                            newPaymentType = type
+                            isShowingPaymentList = false
+                            updateCurrency(for: type)
+                        }) {
+                            Text(type.name ?? "Unknown Type")
+                        }
+                    }
+                }
+                .frame(width: 300, height: 400)
             }
 
-            .pickerStyle(WheelPickerStyle())
-            .onChange(of: newPaymentType) { _, newValue in
-                updateCurrency(for: newValue)
-            }
-            
             HStack {
                 TextField(selectedCurrency == "AED" ? "Amount" : "Foreign Amount", text: $newForeignAmount)
                     .keyboardType(.decimalPad)
@@ -292,6 +340,71 @@ struct InvoiceView: View {
     }
     
 }
+
+//struct SignatureView: View {
+//
+//    @Binding var isOpened: Bool
+//    @Binding var signatureImage: UIImage?
+//    @State private var currentPath = Path()
+//    @State private var drawnImage: UIImage? = nil
+//        
+//        var body: some View {
+//            VStack {
+//                Text("Draw your signature")
+//                    .font(.headline)
+//                
+//                // Drawing canvas where user can sign
+//                Canvas { context, size in
+//                    context.stroke(currentPath, with: .color(.black), lineWidth: 3)
+//                }
+//                .gesture(DragGesture(minimumDistance: 0)
+//                    .onChanged { value in
+//                        let newPoint = value.location
+//                        if currentPath.isEmpty {
+//                            currentPath.move(to: newPoint)
+//                        } else {
+//                            currentPath.addLine(to: newPoint)
+//                        }
+//                    }
+//                )
+//                .frame(height: 200)
+//                .background(Color.white)
+//                .border(Color.black, width: 1)
+//                .cornerRadius(10)
+//                
+//                HStack {
+//                    Button("Clear") {
+//                        currentPath = Path() // Reset the signature
+//                    }
+//                    .padding()
+//                    
+//                    Spacer()
+//                    
+//                    Button("Done") {
+//                        signatureImage = captureSignatureImage()
+//                        isOpened = false
+//                    }
+//                    .padding()
+//                    .background(Color.blue)
+//                    .foregroundColor(.white)
+//                    .cornerRadius(8)
+//                }
+//            }
+//            .padding()
+//        }
+//    
+//    private func captureSignatureImage() -> UIImage? {
+//        let controller = UIHostingController(rootView: self)
+//        let view = controller.view!
+//        let size = CGSize(width: view.frame.width - 50, height: 400)
+//        let renderer = UIGraphicsImageRenderer(size: size)
+//        let image = renderer.image { context in
+//            view.layer.render(in: context.cgContext)
+//        }
+//        return image
+//    }
+//
+//}
 
 func loadPaymentTypes() -> [PaymentType] {
     let jsonData = """
@@ -485,4 +598,197 @@ func loadPaymentTypes() -> [PaymentType] {
         return []
     }
     
+}
+
+struct SignatureView: View {
+    
+    @Binding var isOpened: Bool
+    @Binding var signatureImage: UIImage?
+    @State private var currentPath = Path()
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Button("Close") {
+                    withAnimation {
+                        isOpened = false
+                        currentPath = Path()
+                    }
+                }
+                .padding()
+                
+                Spacer()
+                
+                Text("Draw your signature:")
+                    .font(.headline)
+                    .padding()
+                
+                Spacer()
+                
+                Button("Save Signature") {
+                    withAnimation {
+                        signatureImage = captureSignatureImage() // Capture the drawn signature
+                        isOpened = false
+                    }
+                }
+                .padding()
+            }
+            .background(Color.gray)
+            Canvas { context, size in
+                context.stroke(currentPath, with: .color(.black), lineWidth: 3)
+            }
+            .gesture(DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let newPoint = value.location
+                            if currentPath.isEmpty {
+                                currentPath.move(to: newPoint)
+                            } else {
+                                currentPath.addLine(to: newPoint)
+                            }
+                        }
+                        .onEnded { _ in })
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(10) // Add rounded corners to the drawing area
+            .padding(.top, 20) // Add spacing to top to align properly
+            
+            Button("Clear") {
+                withAnimation {
+                    currentPath = Path()
+                }
+            }
+            .padding()
+            
+            Spacer()
+        }
+        .onAppear {
+            if let signatureImage = signatureImage {
+                currentPath = createPath(from: signatureImage)
+            }
+        }
+        .padding()
+        .background(Color.white) // Set the background color to white
+        .cornerRadius(20) // Rounded corners for the entire signature view
+        .shadow(radius: 20) // Add a shadow effect for elevation
+        .padding(30)
+        .frame(width: UIScreen.main.bounds.width - 50, height: UIScreen.main.bounds.height / 2)
+    }
+
+    // Function to capture the drawn signature as UIImage
+    private func captureSignatureImage() -> UIImage? {
+        let size = CGSize(width: 500, height: 200)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        
+        return renderer.image { context in
+            context.cgContext.setStrokeColor(UIColor.black.cgColor)
+            context.cgContext.setLineWidth(3)
+            context.cgContext.addPath(currentPath.cgPath)
+            context.cgContext.strokePath()
+        }
+    }
+    
+    private func createPath(from image: UIImage) -> Path {
+        guard let cgImage = image.cgImage else { return Path() }
+        
+        let width = cgImage.width
+        let height = cgImage.height
+        let colorSpace = CGColorSpaceCreateDeviceGray()
+        let context = CGContext(data: nil,
+                                width: width,
+                                height: height,
+                                bitsPerComponent: 8,
+                                bytesPerRow: width,
+                                space: colorSpace,
+                                bitmapInfo: CGImageAlphaInfo.none.rawValue)!
+        
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        
+        guard let pixelData = context.data else { return Path() }
+        
+        // Correctly interpret the data as a pointer to UInt8
+        let data = pixelData.bindMemory(to: UInt8.self, capacity: width * height)
+        
+        var path = Path()
+        for y in 0..<height {
+            for x in 0..<width {
+                let pixel = data[y * width + x]
+                if pixel < 128 { // Threshold for detecting "drawn" pixels
+                    let point = CGPoint(x: x, y: height - y) // Flip y-axis for SwiftUI
+                    if path.isEmpty {
+                        path.move(to: point)
+                    } else {
+                        path.addLine(to: point)
+                    }
+                }
+            }
+        }
+        return path
+    }
+
+
+}
+
+struct ContentView: View {
+    
+    @State private var signatureImage: UIImage? = nil
+    @State private var isShowingSignatureView = false
+    
+    var body: some View {
+        ZStack {
+            VStack {
+                Button(action: {
+                    if signatureImage != nil {
+                        isShowingSignatureView = true // Open signature view to display the existing signature
+                    } else {
+                        isShowingSignatureView.toggle() // Open signature view for capturing a signature
+                    }
+                }) {
+                    VStack {
+                        if let image = signatureImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.blue, lineWidth: 2)
+                                )
+                        } else {
+                            VStack {
+                                Image(systemName: "plus.circle")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.blue)
+                                Text("Add Signature")
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+                }
+                
+                if let signature = signatureImage {
+                    Image(uiImage: signature)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 100)
+                        .padding()
+                }
+            }
+            .padding()
+            
+            // Signature view overlay when isShowingSignatureView is true
+            if isShowingSignatureView {
+                ZStack {
+                    Color.black.opacity(0.5)
+                        .ignoresSafeArea() // Dimmed background
+                    
+                    SignatureView(isOpened: $isShowingSignatureView, signatureImage: $signatureImage)
+                }
+            }
+        }
+    }
 }
