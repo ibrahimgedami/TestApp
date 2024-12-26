@@ -44,7 +44,7 @@ struct Invoice {
     
     var amount: Double
     var payments: [Payment]
-    var vatAmount: Double // Directly specify the VAT amount
+    var vatAmount: Double
     var currencyCode: String
     var exchangeRate: Double
     var discount: Double?
@@ -94,7 +94,7 @@ struct InvoiceView: View {
         discount: nil,
         additionalDiscount: 0.0
     )
-    
+    @State private var isShowingPaymentList = false
     @State private var newPaymentType: PaymentType?
     @State private var newForeignAmount: String = ""
     @State private var selectedCurrency: String = "AED"
@@ -245,13 +245,11 @@ struct InvoiceView: View {
     }
     
     private func addPayment() {
-        print("Adding Payment Type:", newPaymentType?.name ?? "nil")
         guard
             let type = newPaymentType,
             let foreignAmount = Double(newForeignAmount),
             foreignAmount > 0
         else {
-            print("Validation failed")
             return
         }
         
