@@ -44,23 +44,28 @@ struct Invoice {
     
     var amount: Double
     var payments: [Payment]
-    var vatPercentage: Double
+    var vatAmount: Double // Directly specify the VAT amount
     var currencyCode: String
     var exchangeRate: Double
     var discount: Double?
     var additionalDiscount: Double
     
     var netAmount: Double {
-        let discountedAmount = amount - (discount ?? 0) - additionalDiscount
+        let discountedAmount = amount - totalDiscount
         return max(discountedAmount, 0)
     }
     
-    var vatAmount: Double {
-        netAmount * (vatPercentage / 100)
+    var totalDiscount: Double {
+        let value = (discount ?? 0) + additionalDiscount
+        return value
     }
     
     var netAmountIncludingVAT: Double {
-        netAmount + vatAmount
+        netAmount
+    }
+    
+    var netAmountExcludingVAT: Double {
+        netAmount - vatAmount
     }
     
     var totalPaid: Double {
@@ -81,9 +86,9 @@ struct Invoice {
 struct InvoiceView: View {
     
     @State private var invoice = Invoice(
-        amount: 1000.0,
+        amount: 350,
         payments: [],
-        vatPercentage: 5.0,
+        vatAmount: 16.67,
         currencyCode: "AED",
         exchangeRate: 1.0,
         discount: nil,
@@ -138,9 +143,9 @@ struct InvoiceView: View {
                 .font(.headline)
             Text("Currency: \(invoice.currencyCode)")
             Text("Exchange Rate: \(invoice.exchangeRate, specifier: "%.1f")")
-            Text("Original Amount: \(invoice.amount, specifier: "%.1f")")
+            Text("Original Amount: \(invoice.netAmountExcludingVAT, specifier: "%.1f")")
+            Text("VAT Amount: \(invoice.vatAmount, specifier: "%.1f")")
             Text("Net Amount: \(invoice.netAmount, specifier: "%.1f")")
-            Text("VAT (\(invoice.vatPercentage)%): \(invoice.vatAmount, specifier: "%.1f")")
             Text("Net Amount Including VAT: \(invoice.netAmountIncludingVAT, specifier: "%.1f")")
             Text("Total Paid: \(invoice.totalPaid, specifier: "%.1f")")
             Text("Remaining Amount: \(invoice.remainingAmount, specifier: "%.1f")")
@@ -152,16 +157,15 @@ struct InvoiceView: View {
     }
     
     private var paymentSection: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 5) {
             Text("Add Payment").font(.headline)
             
             Picker("Payment Type", selection: $newPaymentType) {
-                ForEach(paymentTypes) { type in
-                    Text(type.name ?? "")
-                        .tag(type as PaymentType?)
+                ForEach(paymentTypes, id: \.cd) { type in
+                    Text(type.name ?? "Unknown Type").tag(type as PaymentType?)
                 }
             }
-            .frame(height: 100)
+
             .pickerStyle(WheelPickerStyle())
             .onChange(of: newPaymentType) { _, newValue in
                 updateCurrency(for: newValue)
@@ -241,9 +245,15 @@ struct InvoiceView: View {
     }
     
     private func addPayment() {
-        guard let type = newPaymentType,
-              let foreignAmount = Double(newForeignAmount),
-              foreignAmount > 0 else { return }
+        print("Adding Payment Type:", newPaymentType?.name ?? "nil")
+        guard
+            let type = newPaymentType,
+            let foreignAmount = Double(newForeignAmount),
+            foreignAmount > 0
+        else {
+            print("Validation failed")
+            return
+        }
         
         let exchangeRate = foreignCurrencies[selectedCurrency] ?? 1.0
         let amount = foreignAmount * exchangeRate
