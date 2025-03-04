@@ -7,17 +7,6 @@
 
 import SwiftUI
 import AppBase
-import CombineNetwork
-
-//@main
-//struct TestAppApp: App {
-//    
-//    var body: some Scene {
-//        WindowGroup {
-//        }
-//    }
-//    
-//}
 
 @main
 struct MyApp: App {

@@ -14,8 +14,10 @@ import SwiftUI
 //}
 
 enum OverlayPath: Hashable {
+    
     case employee
     case authError(message: String)
+    
 }
 
 class BaseCoordinator: ObservableObject {
@@ -49,12 +51,15 @@ class AppCoordinator: ObservableObject {
     @Published var activeOverlay: OverlayType?
     
     enum AppRoute: Hashable {
+        
         case splash
         case login
         case dashboard
+        
     }
     
     enum OverlayType: Identifiable {
+        
         case employee
         case authError(message: String)
         
@@ -96,6 +101,3 @@ class AppCoordinator: ObservableObject {
     }
 
 }
-
-
-
