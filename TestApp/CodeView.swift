@@ -13,80 +13,56 @@ import SwiftUI
 //    case dashboard
 //}
 
-enum OverlayPath: Hashable {
+enum AppRoute: Hashable {
+    
+    case splash
+    case login
+    case dashboard
+    
+}
+
+enum OverlayType: Identifiable, Hashable {
     
     case employee
     case authError(message: String)
     
+    var id: String {
+        switch self {
+        case .employee:
+            return "employee"
+        case .authError(let message):
+            return message
+        }
+    }
+
 }
 
-class BaseCoordinator: ObservableObject {
+class AppCoordinator: ObservableObject {
     
-    @Published var path: [NavigationPath] = []
-    @Published var activeOverlay: OverlayPath?
+    static let shared = AppCoordinator()
     
-    func navigate(to route: NavigationPath) {
+    @Published var path: [AppRoute] = []
+    @Published var activeOverlay: OverlayType?
+    
+    func navigate(to route: AppRoute) {
         path.append(route)
     }
     
     func pop() {
-        path.removeLast()
+        if !path.isEmpty {
+            path.removeLast()
+        }
     }
     
-    func showOverlay(_ overlay: OverlayPath) {
+    func showOverlay(_ overlay: OverlayType) {
         activeOverlay = overlay
     }
     
     func dismissOverlay() {
         activeOverlay = nil
     }
-
-}
-
-class AppCoordinator: ObservableObject {
-    static let shared = AppCoordinator()
     
-    @Published var path = NavigationPath()
-    @Published var isOverlayPresented = false
-    @Published var activeOverlay: OverlayType?
-    
-    enum AppRoute: Hashable {
-        
-        case splash
-        case login
-        case dashboard
-        
-    }
-    
-    enum OverlayType: Identifiable {
-        
-        case employee
-        case authError(message: String)
-        
-        var id: String {
-            switch self {
-            case .employee:
-                return "employee"
-            case .authError(let message):
-                return message
-            }
-        }
-    }
-    
-    func navigate(to route: AppRoute) {
-        path.append(route)
-    }
-    
-    func showOverlay(_ overlay: OverlayType) {
-        self.activeOverlay = overlay
-        self.isOverlayPresented = true
-    }
-    
-    func dismissOverlay() {
-        self.activeOverlay = nil
-        self.isOverlayPresented = false
-    }
-    
+    // MARK: - Business Logic
     func loginSuccess() {
         showOverlay(.employee)
     }

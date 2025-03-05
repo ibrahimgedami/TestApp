@@ -10,7 +10,6 @@ import AppBase
 
 @main
 struct MyApp: App {
-    
     @StateObject var coordinator = AppCoordinator.shared
     
     var body: some Scene {
@@ -18,7 +17,7 @@ struct MyApp: App {
             NavigationStack(path: $coordinator.path) {
                 SplashView()
                     .environmentObject(coordinator)
-                    .navigationDestination(for: AppCoordinator.AppRoute.self) { route in
+                    .navigationDestination(for: AppRoute.self) { route in
                         switch route {
                         case .splash:
                             SplashView()
@@ -38,8 +37,8 @@ struct MyApp: App {
             }
         }
     }
-
 }
+
 
 
 

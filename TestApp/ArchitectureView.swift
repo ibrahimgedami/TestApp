@@ -77,7 +77,7 @@ struct OverlayModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(
-                ZStack {
+                Group {
                     if let overlay = coordinator.activeOverlay {
                         Color.black.opacity(0.4)
                             .ignoresSafeArea()
@@ -89,15 +89,13 @@ struct OverlayModifier: ViewModifier {
                         case .employee:
                             EmployeeView()
                                 .environmentObject(coordinator)
-                                .frame(width: 300, height: 300)
                         case .authError(let message):
                             ErrorView(message: message)
-                                .environmentObject(coordinator)
                         }
                     }
                 }
             )
-            .animation(.easeInOut, value: coordinator.isOverlayPresented)
+            .animation(.easeInOut, value: coordinator.activeOverlay != nil)
     }
 
 }
