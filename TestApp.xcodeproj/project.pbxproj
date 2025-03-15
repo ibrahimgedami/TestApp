@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		051B22242D84C2AC00367E69 /* CartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051B22232D84C2AC00367E69 /* CartViewModel.swift */; };
 		0559C8962D81911D00251E5B /* CartButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0559C8952D81911D00251E5B /* CartButton.swift */; };
 		05C2C4222D8359AD00061CBB /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C2C4212D8359AD00061CBB /* Item.swift */; };
 		05C2C4282D835AEF00061CBB /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C2C4252D835AEF00061CBB /* HomeView.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		051B22232D84C2AC00367E69 /* CartViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartViewModel.swift; sourceTree = "<group>"; };
 		0559C8952D81911D00251E5B /* CartButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartButton.swift; sourceTree = "<group>"; };
 		05C2C4212D8359AD00061CBB /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		05C2C4252D835AEF00061CBB /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -31,6 +33,10 @@
 		DDB902FD2BF36CCF00A2FF5A /* TestApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TestApp.entitlements; sourceTree = "<group>"; };
 		DDB902FF2BF36CCF00A2FF5A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		05C8B5572D840DB20041112D /* PDF */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = PDF; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		DDB902F12BF36CCD00A2FF5A /* Frameworks */ = {
@@ -45,6 +51,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		051B22222D84C29900367E69 /* Product */ = {
+			isa = PBXGroup;
+			children = (
+				051B22232D84C2AC00367E69 /* CartViewModel.swift */,
+			);
+			path = Product;
+			sourceTree = "<group>";
+		};
 		05C2C41C2D83593B00061CBB /* SearchBar */ = {
 			isa = PBXGroup;
 			children = (
@@ -90,6 +104,8 @@
 		DDB902F62BF36CCD00A2FF5A /* TestApp */ = {
 			isa = PBXGroup;
 			children = (
+				051B22222D84C29900367E69 /* Product */,
+				05C8B5572D840DB20041112D /* PDF */,
 				05C2C41C2D83593B00061CBB /* SearchBar */,
 				DDB902F72BF36CCD00A2FF5A /* TestAppApp.swift */,
 				DDB902FB2BF36CCF00A2FF5A /* Assets.xcassets */,
@@ -123,6 +139,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				05C8B5572D840DB20041112D /* PDF */,
 			);
 			name = TestApp;
 			packageProductDependencies = (
@@ -191,6 +210,7 @@
 				05C2C4292D835AEF00061CBB /* StickySearchBar.swift in Sources */,
 				05C2C4222D8359AD00061CBB /* Item.swift in Sources */,
 				DDB902F82BF36CCD00A2FF5A /* TestAppApp.swift in Sources */,
+				051B22242D84C2AC00367E69 /* CartViewModel.swift in Sources */,
 				05EC48D42D8159DF006FB7EE /* ShareButton.swift in Sources */,
 				0559C8962D81911D00251E5B /* CartButton.swift in Sources */,
 			);

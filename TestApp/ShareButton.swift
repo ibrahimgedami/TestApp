@@ -58,7 +58,7 @@ struct ShareSheet: UIViewControllerRepresentable {
     
 }
 
-struct Product: SharableContent {
+struct ShareProduct: SharableContent {
     
     let brand: String
     let stock: String
@@ -73,7 +73,7 @@ struct Product: SharableContent {
 
 struct ContentView: View {
     
-    let product = Product(
+    let product = ShareProduct(
         brand: "Apple",
         stock: "2",
         description: "The latest iPhone with amazing performance!",
