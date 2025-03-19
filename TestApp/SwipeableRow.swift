@@ -24,7 +24,6 @@ struct SwipeableRow: View {
         ZStack(alignment: .trailing) {
             
             if showActions {
-                // ✅ Action Buttons (Only Rendered When Swiping Starts)
                 HStack(spacing: 8) {
                     Button {
                         onEdit()
