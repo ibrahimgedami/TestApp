@@ -10,11 +10,13 @@ import AppBase
 
 struct NavigationContentView: View {
     
-    @State var menuString = ["Profile", "Home", "Settings", "Notifications"]
-    @State var xAxis: CGFloat = 0
+    @State var menuString = ["Profile", "Home", "Settings", "Notifi"]
     @State var selectedIndex: Int = 0
     @Namespace var animation
-
+    
+    // Instead of hardcoded xAxis, calculate dynamically based on GeometryReader
+    @State private var xAxis: CGFloat = 0
+    
     var body: some View {
         VStack(spacing: 0) {
             Image("IMG")
@@ -23,84 +25,114 @@ struct NavigationContentView: View {
                 .frame(height: 200)
                 .edgesIgnoringSafeArea(.top)
             
-            ZStack(alignment: .top) {
-                CustomShape(xAxis: xAxis)
-                    .edgesIgnoringSafeArea(.bottom)
-                    .frame(height: 50)
-                    .matchedGeometryEffect(id: "showRect", in: animation)
+            GeometryReader { geo in
+                let width = geo.size.width
+                let tabWidth = width / CGFloat(menuString.count)
                 
-                HStack {
-                    ForEach(menuString.indices, id: \.self) { number in
-                        Text(menuString[number])
-                            .foregroundStyle(selectedIndex == number ? .red : .gray)
-                            .frame(width: (UIScreen.main.bounds.width - 20) / CGFloat(menuString.count))
-                            .offset(y: 5)
-                            .onTapGesture {
-                                selectedIndex = number
-                                withAnimation {
-                                    xAxis = 10 + CGFloat((100 * number) - (number != 0 ? 5 / number : 0))
+                ZStack(alignment: .topLeading) {
+                    CustomShape(xAxis: xAxis, tabCount: menuString.count)
+                        .fill(Color.blue)
+                        .shadow(radius: 2)
+                        .frame(height: 50)
+                        .matchedGeometryEffect(id: "showRect", in: animation)
+                    
+                    HStack(spacing: 0) {
+                        ForEach(menuString.indices, id: \.self) { number in
+                            Text(menuString[number])
+                                .foregroundColor(selectedIndex == number ? .black : .gray.opacity(0.5))
+                                .frame(width: tabWidth, height: 50)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    withAnimation(.easeInOut) {
+                                        selectedIndex = number
+                                        xAxis = tabWidth * CGFloat(number)
+                                    }
                                 }
-                            }
+                        }
                     }
                 }
+                .offset(y: -30)
+                .onAppear {
+                    // initialize xAxis on appear for first tab
+                    xAxis = tabWidth * CGFloat(selectedIndex)
+                }
             }
-            .offset(y: -30)
+//            .padding()
+            .frame(height: 50) // fix GeometryReader height
+            
             Spacer()
             
-            switch selectedIndex {
-            case 0:
-                FirstView()
-            case 1:
-                SecondView()
-            case 2:
-                ThirdView()
-            case 3:
-                FourthView()
-            default:
-                EmptyView()
+            // Show selected view
+            Group {
+                switch selectedIndex {
+                case 0:
+                    FirstView()
+                case 1:
+                    SecondView()
+                case 2:
+                    ThirdView()
+                case 3:
+                    FourthView()
+                default:
+                    EmptyView()
+                }
             }
             
             Spacer()
         }
-
     }
 }
-
-#Preview(body: {
-    NavigationContentView()
-})
 
 struct CustomShape: Shape {
     
     var xAxis: CGFloat
+    var tabCount: Int = 4  // You can pass this from outside if needed
+    
     var animatableData: CGFloat {
         get { xAxis }
         set { xAxis = newValue }
     }
     
     func path(in rect: CGRect) -> Path {
-        let customPath = Path { path in
+        let tabWidth = rect.width / CGFloat(tabCount)
+        // Center of the curve is at xAxis + half tabWidth
+        let center = xAxis + tabWidth / 2
+        
+        // Curve width and height relative to tabWidth
+        let curveWidth = tabWidth * 0.75
+        let curveHeight: CGFloat = 45
+        
+        let leftCurveStart = center - curveWidth / 1.3
+        let rightCurveEnd = center + curveWidth / 1.3
+        
+        return Path { path in
+            // Draw outer rectangle
             path.move(to: CGPoint(x: 0, y: 0))
             path.addLine(to: CGPoint(x: rect.width, y: 0))
             path.addLine(to: CGPoint(x: rect.width, y: rect.height))
             path.addLine(to: CGPoint(x: 0, y: rect.height))
-            let center = xAxis + 40
-            path.move(to: CGPoint(x: center - 70, y: 0))
-            let to1 = CGPoint(x: center, y: 35)
-            let control1 = CGPoint(x: center - 30, y: 0)
-            let control2 = CGPoint(x: center - 50, y: 35)
+            path.closeSubpath()
             
-            let to2 = CGPoint(x: center + 70, y: 0)
-            let control3 = CGPoint(x: center + 50, y: 35)
-            let control4 = CGPoint(x: center + 30, y: 35)
+            // Draw top curved bump
+            path.move(to: CGPoint(x: leftCurveStart, y: 0))
+            let to1 = CGPoint(x: center, y: curveHeight)
+            let control1 = CGPoint(x: leftCurveStart + curveWidth * 0.3, y: 0)
+            let control2 = CGPoint(x: leftCurveStart + curveWidth * 0.1, y: curveHeight)
+            
+            let to2 = CGPoint(x: rightCurveEnd, y: 0)
+            let control3 = CGPoint(x: rightCurveEnd - curveWidth * 0.1, y: curveHeight)
+            let control4 = CGPoint(x: rightCurveEnd - curveWidth * 0.3, y: 0)
             
             path.addCurve(to: to1, control1: control1, control2: control2)
             path.addCurve(to: to2, control1: control3, control2: control4)
         }
-        return customPath
     }
-    
+
 }
+
+#Preview(body: {
+    NavigationContentView()
+})
 
 struct FirstView: View {
     
