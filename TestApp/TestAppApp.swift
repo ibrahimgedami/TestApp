@@ -53,7 +53,6 @@ struct TestAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            PreviewView()
         }
     }
     
