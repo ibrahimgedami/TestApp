@@ -11,10 +11,11 @@
 		050943CA2D4742360046A401 /* FilterTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 050943C52D4742360046A401 /* FilterTableViewCell.xib */; };
 		050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C42D4742360046A401 /* FilterTableViewCell.swift */; };
 		050943CC2D4742360046A401 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C62D4742360046A401 /* FilterViewController.swift */; };
+		05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B177192DD8C4D000697606 /* CurveSegement.swift */; };
 		05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D027262D5C904D00A82D32 /* SelectionView.swift */; };
 		05EB5DE82D6905B30077047F /* SwipeableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EB5DE72D6905B30077047F /* SwipeableAction.swift */; };
 		05EC956B2DC08BD100203CAC /* SegmentedControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EC956A2DC08BD100203CAC /* SegmentedControlView.swift */; };
-		DD0E3E762CFDFF0A005ECD21 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0E3E752CFDFF0A005ECD21 /* CurveSegement.swift */; };
+		DD0E3E762CFDFF0A005ECD21 /* PDFUIViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */; };
 		DD0E3E792D002F5B005ECD21 /* AppBase in Frameworks */ = {isa = PBXBuildFile; productRef = DD0E3E782D002F5B005ECD21 /* AppBase */; };
 		DD2CA2EE2D1BD325001259CC /* JobCardDeliveryInvoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2CA2ED2D1BD325001259CC /* JobCardDeliveryInvoice.swift */; };
 		DD3DCB4F2CC66D600068DA80 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3DCB4E2CC66D600068DA80 /* MainView.swift */; };
@@ -31,10 +32,11 @@
 		050943C52D4742360046A401 /* FilterTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterTableViewCell.xib; sourceTree = "<group>"; };
 		050943C62D4742360046A401 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		050943C72D4742360046A401 /* FilterViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterViewController.xib; sourceTree = "<group>"; };
+		05B177192DD8C4D000697606 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
 		05D027262D5C904D00A82D32 /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
 		05EB5DE72D6905B30077047F /* SwipeableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeableAction.swift; sourceTree = "<group>"; };
 		05EC956A2DC08BD100203CAC /* SegmentedControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedControlView.swift; sourceTree = "<group>"; };
-		DD0E3E752CFDFF0A005ECD21 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
+		DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFUIViewWrapper.swift; sourceTree = "<group>"; };
 		DD2CA2ED2D1BD325001259CC /* JobCardDeliveryInvoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobCardDeliveryInvoice.swift; sourceTree = "<group>"; };
 		DD3DCB4E2CC66D600068DA80 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		DDB902F42BF36CCD00A2FF5A /* TestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				05EC956A2DC08BD100203CAC /* SegmentedControlView.swift */,
+				05B177192DD8C4D000697606 /* CurveSegement.swift */,
 			);
 			path = SegmentedControl;
 			sourceTree = "<group>";
@@ -114,7 +117,7 @@
 				DDB902FD2BF36CCF00A2FF5A /* TestApp.entitlements */,
 				DDB902FE2BF36CCF00A2FF5A /* Preview Content */,
 				DD3DCB4E2CC66D600068DA80 /* MainView.swift */,
-				DD0E3E752CFDFF0A005ECD21 /* CurveSegement.swift */,
+				DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */,
 				DDFDD4D72D08158E00990B31 /* Alert.swift */,
 				DDFB69962D086C1D0004ED52 /* PDFViewWrapper.swift */,
 				05EB5DE72D6905B30077047F /* SwipeableAction.swift */,
@@ -214,11 +217,12 @@
 			files = (
 				DDB902F82BF36CCD00A2FF5A /* TestAppApp.swift in Sources */,
 				05EB5DE82D6905B30077047F /* SwipeableAction.swift in Sources */,
-				DD0E3E762CFDFF0A005ECD21 /* CurveSegement.swift in Sources */,
+				DD0E3E762CFDFF0A005ECD21 /* PDFUIViewWrapper.swift in Sources */,
 				DD2CA2EE2D1BD325001259CC /* JobCardDeliveryInvoice.swift in Sources */,
 				DDFDD4D82D08158E00990B31 /* Alert.swift in Sources */,
 				DD3DCB4F2CC66D600068DA80 /* MainView.swift in Sources */,
 				DDFB69972D086C1D0004ED52 /* PDFViewWrapper.swift in Sources */,
+				05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */,
 				05EC956B2DC08BD100203CAC /* SegmentedControlView.swift in Sources */,
 				050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */,
 				050943CC2D4742360046A401 /* FilterViewController.swift in Sources */,

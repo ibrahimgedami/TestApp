@@ -9,39 +9,43 @@ import SwiftUI
 import AppBase
 import CombineNetwork
 
-public struct MockedToken {
+
+struct InformationView: View {
     
-    static func mockData() -> Token? {
-        let model = mockSuccessCase()?.content
-        return model
-    }
+    @State private var showingInfo = false
     
-    static private func mockSuccessCase() -> BaseResponse<Token>? {
-        guard let model = FileHelper.shared.decodeJSONFromFile(filename: "R.file.branchAuthJsonJson.name", as: BaseResponse<Token>.self) else { return nil }
-        return model
-    }
-    
-    static func mockFailureCase() -> BaseResponse<Token>? {
-        let jsonString = """
-        {
-            "status": 1003,
-            "message": "Ref.#403_1-PARAM003\\nLocation username is mandatory.",
-            "content": null,
-            "pagination": null,
-            "error": {
-                "code": "PARAM003",
-                "message": "Location username is mandatory.",
-                "reason": "Location username is mandatory."
+    var body: some View {
+        VStack {
+            HStack {
+                HStack {
+                    Rectangle()
+                        .frame(height: 50)
+                        .cornerRadius(12, corners: .allCorners)
+                        .onTapGesture {
+                            debugPrint("Information pressed")
+                        }
+                    
+                    Button(action: {
+                        showingInfo.toggle()
+                    }) {
+                        Image("icon_info")
+                            .font(.largeTitle)
+                            .foregroundStyle(.blue)
+                    }
+                    .alert("Information", isPresented: $showingInfo) {
+                        Button("OK", role: .cancel) { }
+                    } message: {
+                        Text("This is an info button.")
+                    }
+                }
+                .padding()
             }
         }
-        """
-        guard let model = FileHelper.shared.decodeJSONFromString(jsonString: jsonString, as: BaseResponse<Token>.self) else {
-            debugPrint("Failed to decode JSON string")
-            return nil
-        }
-        return model
     }
-    
+}
+
+#Preview {
+    InformationView()
 }
 
 @main

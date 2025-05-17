@@ -269,3 +269,7 @@ struct PreviewView: View {
     }
     
 }
+
+#Preview(body: {
+    PreviewView()
+})
