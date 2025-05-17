@@ -8,7 +8,7 @@
 import SwiftUI
 import AppBase
 
-struct NavigationContentView: View {
+struct CurveSegement: View {
     
     @State var menuString = ["Profile", "Home", "Settings", "Notifi"]
     @State var selectedIndex: Int = 0
@@ -131,7 +131,7 @@ struct CustomShape: Shape {
 }
 
 #Preview(body: {
-    NavigationContentView()
+    CurveSegement()
 })
 
 struct FirstView: View {
