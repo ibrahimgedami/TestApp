@@ -9,10 +9,23 @@ import SwiftUI
 import AppBase
 import CombineNetwork
 
+class InformationViewModel: ObservableObject {
+    
+    let numbers = [1, 2, 3, 4]
+    
+    var result = 0
+    
+    func doTask() -> [Int] {
+        let lazySquared = numbers.lazy.map { $0 * $0 }
+        return Array(lazySquared) // [1, 4, 9, 16]
+    }
+    
+}
 
 struct InformationView: View {
     
     @State private var showingInfo = false
+    @StateObject private var viewModel = InformationViewModel()
     
     var body: some View {
         VStack {
@@ -32,8 +45,10 @@ struct InformationView: View {
                             .font(.largeTitle)
                             .foregroundStyle(.blue)
                     }
-                    .alert("Information", isPresented: $showingInfo) {
-                        Button("OK", role: .cancel) { }
+                    .alert("Information\n\n\n", isPresented: $showingInfo) {
+                        Button("OK", role: .cancel) {
+                            
+                        }
                     } message: {
                         Text("This is an info button.")
                     }
@@ -41,7 +56,11 @@ struct InformationView: View {
                 .padding()
             }
         }
+        .onAppear {
+            viewModel.doTask()
+        }
     }
+    
 }
 
 #Preview {
