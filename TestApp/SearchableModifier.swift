@@ -37,8 +37,7 @@ struct SearchView: View {
         "Kumquat", "Lychee", "Mulberry", "Naranjilla", "Olive", "Peach", "Rambutan", "Salak",
         "Tamarind", "Yuzu", "Persimmon", "Longan"
     ]
-    let columns = [GridItem(.flexible()), GridItem(.flexible())
-    ]
+    let columns = [GridItem(.adaptive(minimum: 150), spacing: 10)]
     
     @State private var filteredData: [String] = []
     
@@ -60,17 +59,16 @@ struct SearchView: View {
                                 .preference(key: ScrollOffsetKey.self, value: geo.frame(in: .named("scroll")).minY)
                         }
                         .frame(height: 0)
+                        if isLoading {
+                            ProgressView("Searching...")
+                                .padding()
+                        }
                         
-                        VStack(spacing: 10) {
-                            if isLoading {
-                                ProgressView("Searching...")
-                                    .padding()
-                            }
-                            
+                        LazyVGrid(columns: columns, spacing: 10) {
                             ForEach(filteredData, id: \.self) { item in
                                 Text(item)
                                     .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .frame(maxWidth: .infinity, minHeight: 60)
                                     .background(Color.white)
                                     .cornerRadius(10)
                                     .shadow(radius: 1)
