@@ -12,6 +12,7 @@
 		050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C42D4742360046A401 /* FilterTableViewCell.swift */; };
 		050943CC2D4742360046A401 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C62D4742360046A401 /* FilterViewController.swift */; };
 		05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B177192DD8C4D000697606 /* CurveSegement.swift */; };
+		05CE8F4A2DDC995400E88223 /* SearchableModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05CE8F492DDC995400E88223 /* SearchableModifier.swift */; };
 		05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D027262D5C904D00A82D32 /* SelectionView.swift */; };
 		05EB5DE82D6905B30077047F /* SwipeableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EB5DE72D6905B30077047F /* SwipeableAction.swift */; };
 		DD0E3E762CFDFF0A005ECD21 /* PDFUIViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */; };
@@ -31,6 +32,7 @@
 		050943C62D4742360046A401 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		050943C72D4742360046A401 /* FilterViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterViewController.xib; sourceTree = "<group>"; };
 		05B177192DD8C4D000697606 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
+		05CE8F492DDC995400E88223 /* SearchableModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableModifier.swift; sourceTree = "<group>"; };
 		05D027262D5C904D00A82D32 /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
 		05EB5DE72D6905B30077047F /* SwipeableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeableAction.swift; sourceTree = "<group>"; };
 		DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFUIViewWrapper.swift; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 				DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */,
 				DDFB69962D086C1D0004ED52 /* PDFViewWrapper.swift */,
 				05EB5DE72D6905B30077047F /* SwipeableAction.swift */,
+				05CE8F492DDC995400E88223 /* SearchableModifier.swift */,
 			);
 			path = TestApp;
 			sourceTree = "<group>";
@@ -219,6 +222,7 @@
 				050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */,
 				050943CC2D4742360046A401 /* FilterViewController.swift in Sources */,
 				05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */,
+				05CE8F4A2DDC995400E88223 /* SearchableModifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
