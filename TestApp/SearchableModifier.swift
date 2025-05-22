@@ -93,7 +93,7 @@ struct SearchView: View {
                                     .padding()
                                 }
                                 .background(Color.white)
-                                .cornerRadius(12)
+                                .cornerRadius(8)
                                 .shadow(radius: 2)
                             }
                         }
@@ -108,8 +108,6 @@ struct SearchView: View {
                     }
                 }
             }
-            .navigationTitle("Search")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -125,6 +123,7 @@ struct SearchView: View {
                         }
                     }) {
                         Image(systemName: "magnifyingglass")
+                            .frame(width: 24, height: 24)
                     }
                 }
             }
