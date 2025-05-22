@@ -11,6 +11,7 @@
 		050943CA2D4742360046A401 /* FilterTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 050943C52D4742360046A401 /* FilterTableViewCell.xib */; };
 		050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C42D4742360046A401 /* FilterTableViewCell.swift */; };
 		050943CC2D4742360046A401 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C62D4742360046A401 /* FilterViewController.swift */; };
+		05227B582DDF162C007DB8FB /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05227B572DDF1628007DB8FB /* Product.swift */; };
 		05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B177192DD8C4D000697606 /* CurveSegement.swift */; };
 		05CE8F4A2DDC995400E88223 /* SearchableModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05CE8F492DDC995400E88223 /* SearchableModifier.swift */; };
 		05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D027262D5C904D00A82D32 /* SelectionView.swift */; };
@@ -31,6 +32,8 @@
 		050943C52D4742360046A401 /* FilterTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterTableViewCell.xib; sourceTree = "<group>"; };
 		050943C62D4742360046A401 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		050943C72D4742360046A401 /* FilterViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterViewController.xib; sourceTree = "<group>"; };
+		05227B572DDF1628007DB8FB /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
+		05227B592DDF189A007DB8FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		05B177192DD8C4D000697606 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
 		05CE8F492DDC995400E88223 /* SearchableModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableModifier.swift; sourceTree = "<group>"; };
 		05D027262D5C904D00A82D32 /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
@@ -106,6 +109,8 @@
 		DDB902F62BF36CCD00A2FF5A /* TestApp */ = {
 			isa = PBXGroup;
 			children = (
+				05227B592DDF189A007DB8FB /* Info.plist */,
+				05227B572DDF1628007DB8FB /* Product.swift */,
 				05EC95692DC08BBD00203CAC /* SegmentedControl */,
 				05D027252D5C902800A82D32 /* SearchableList */,
 				DDB902F72BF36CCD00A2FF5A /* TestAppApp.swift */,
@@ -218,6 +223,7 @@
 				DD2CA2EE2D1BD325001259CC /* JobCardDeliveryInvoice.swift in Sources */,
 				DD3DCB4F2CC66D600068DA80 /* MainView.swift in Sources */,
 				DDFB69972D086C1D0004ED52 /* PDFViewWrapper.swift in Sources */,
+				05227B582DDF162C007DB8FB /* Product.swift in Sources */,
 				05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */,
 				050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */,
 				050943CC2D4742360046A401 /* FilterViewController.swift in Sources */,
@@ -356,6 +362,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TestApp/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -394,6 +401,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TestApp/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

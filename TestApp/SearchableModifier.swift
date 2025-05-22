@@ -11,6 +11,7 @@ import Speech
 import Combine
 
 struct SearchView: View {
+    
     // MARK: - States
     @State private var searchText = ""
     @State private var isSearching = false
@@ -28,18 +29,11 @@ struct SearchView: View {
     @State private var scrollOffset: CGFloat = 0
     
     // MARK: - Dummy Data
-    let dummyData = [
-        "Apple", "Banana", "Cherry", "Date", "Elderberry", "Fig", "Grapes", "Honeydew",
-        "Jackfruit", "Kiwi", "Lemon", "Mango", "Nectarine", "Orange", "Papaya", "Quince",
-        "Raspberry", "Strawberry", "Tangerine", "Ugli Fruit", "Vanilla Bean", "Watermelon",
-        "Xigua", "Yellow Passion Fruit", "Zucchini", "Apricot", "Blackberry", "Cantaloupe",
-        "Dragon Fruit", "Eggfruit", "Feijoa", "Guava", "Hackberry", "Imbe", "Jujube",
-        "Kumquat", "Lychee", "Mulberry", "Naranjilla", "Olive", "Peach", "Rambutan", "Salak",
-        "Tamarind", "Yuzu", "Persimmon", "Longan"
-    ]
+    let dummyData: [Product] = Product.dummyData
+
     let columns = [GridItem(.adaptive(minimum: 150), spacing: 10)]
     
-    @State private var filteredData: [String] = []
+    @State private var filteredData: [Product] = []
     
     var body: some View {
         NavigationStack {
@@ -65,13 +59,42 @@ struct SearchView: View {
                         }
                         
                         LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(filteredData, id: \.self) { item in
-                                Text(item)
+                            ForEach(filteredData, id: \.id) { product in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    AsyncImage(url: URL(string: product.imageUrl)) { image in
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(height: 100)
+                                            .frame(maxWidth: .infinity)
+                                            .clipped()
+                                            .cornerRadius(8)
+                                            .padding(0)
+                                    } placeholder: {
+                                        Image("IMG")
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(height: 100)
+                                            .frame(maxWidth: .infinity)
+                                            .clipped()
+                                            .cornerRadius(8)
+                                            .padding(0)
+                                    }
+
+                                    VStack {
+                                        Text(product.name)
+                                            .font(.headline)
+                                            .lineLimit(1)
+                                        
+                                        Text(product.price)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
                                     .padding()
-                                    .frame(maxWidth: .infinity, minHeight: 60)
-                                    .background(Color.white)
-                                    .cornerRadius(10)
-                                    .shadow(radius: 1)
+                                }
+                                .background(Color.white)
+                                .cornerRadius(12)
+                                .shadow(radius: 2)
                             }
                         }
                         .padding()
@@ -107,7 +130,7 @@ struct SearchView: View {
             }
             .onChange(of: searchText) { _, _ in debounceSearch() }
             .onAppear {
-                filteredData = dummyData
+                filteredData = Product.dummyData
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
         }
@@ -182,7 +205,7 @@ struct SearchView: View {
                     isLoading = false
                 } else {
                     filteredData = dummyData.filter {
-                        $0.localizedCaseInsensitiveContains(text)
+                        $0.name.localizedCaseInsensitiveContains(text)
                     }
                     isLoading = false
                     showResults = true
@@ -209,10 +232,12 @@ struct SearchView: View {
 
 // MARK: - Offset PreferenceKey
 struct ScrollOffsetKey: PreferenceKey {
+    
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }
+    
 }
 
 class SpeechRecognizer: NSObject, SFSpeechRecognizerDelegate {
