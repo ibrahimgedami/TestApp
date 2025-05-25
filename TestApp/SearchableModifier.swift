@@ -31,31 +31,27 @@ struct SearchView: View {
     // MARK: - Dummy Data
     let dummyData: [Product] = Product.dummyData
 
-    let columns = [GridItem(.adaptive(minimum: 150), spacing: 10)]
-    
+//    let columns = [GridItem(.adaptive(minimum: 150), spacing: 10)]
+    let columns = [GridItem(.adaptive(minimum: 100), spacing: 10)]
     @State private var filteredData: [Product] = []
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                if isSearching {
-                    searchBar
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .animation(.easeInOut, value: isSearching)
-                        .background(.ultraThinMaterial)
-                        .padding(.top, hideNavBar ? -100 : 0)
-                }
-                
-                ScrollViewReader { scrollProxy in
-                    ScrollView {
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    VStack(spacing: 0) {
                         GeometryReader { geo in
                             Color.clear
                                 .preference(key: ScrollOffsetKey.self, value: geo.frame(in: .named("scroll")).minY)
                         }
                         .frame(height: 0)
-                        if isLoading {
-                            ProgressView("Searching...")
-                                .padding()
+                        
+                        if isSearching {
+                            searchBar
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                                .animation(.easeInOut, value: isSearching)
+                                .background(.ultraThinMaterial)
+                                .padding(.top, hideNavBar ? -100 : 0)
                         }
                         
                         LazyVGrid(columns: columns, spacing: 10) {
@@ -69,7 +65,6 @@ struct SearchView: View {
                                             .frame(maxWidth: .infinity)
                                             .clipped()
                                             .cornerRadius(8)
-                                            .padding(0)
                                     } placeholder: {
                                         Image("IMG")
                                             .resizable()
@@ -78,9 +73,8 @@ struct SearchView: View {
                                             .frame(maxWidth: .infinity)
                                             .clipped()
                                             .cornerRadius(8)
-                                            .padding(0)
                                     }
-
+                                    
                                     VStack {
                                         Text(product.name)
                                             .font(.headline)
@@ -95,6 +89,7 @@ struct SearchView: View {
                                 .background(Color.white)
                                 .cornerRadius(8)
                                 .shadow(radius: 2)
+                                .frame(maxWidth: .infinity)
                             }
                         }
                         .padding()
@@ -134,6 +129,106 @@ struct SearchView: View {
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
         }
     }
+
+//    var body: some View {
+//        NavigationStack {
+//            VStack(spacing: 0) {
+//                if isSearching {
+//                    searchBar
+//                        .transition(.move(edge: .top).combined(with: .opacity))
+//                        .animation(.easeInOut, value: isSearching)
+//                        .background(.ultraThinMaterial)
+//                        .padding(.top, hideNavBar ? -100 : 0)
+//                }
+//                
+//                ScrollViewReader { scrollProxy in
+//                    ScrollView {
+//                        GeometryReader { geo in
+//                            Color.clear
+//                                .preference(key: ScrollOffsetKey.self, value: geo.frame(in: .named("scroll")).minY)
+//                        }
+//                        .frame(height: 0)
+//                        if isLoading {
+//                            ProgressView("Searching...")
+//                                .padding()
+//                        }
+//                        
+//                        LazyVGrid(columns: columns, spacing: 10) {
+//                            ForEach(filteredData, id: \.id) { product in
+//                                VStack(alignment: .leading, spacing: 8) {
+//                                    AsyncImage(url: URL(string: product.imageUrl)) { image in
+//                                        image
+//                                            .resizable()
+//                                            .scaledToFill()
+//                                            .frame(height: 100)
+//                                            .frame(maxWidth: .infinity)
+//                                            .clipped()
+//                                            .cornerRadius(8)
+//                                            .padding(0)
+//                                    } placeholder: {
+//                                        Image("IMG")
+//                                            .resizable()
+//                                            .scaledToFill()
+//                                            .frame(height: 100)
+//                                            .frame(maxWidth: .infinity)
+//                                            .clipped()
+//                                            .cornerRadius(8)
+//                                            .padding(0)
+//                                    }
+//
+//                                    VStack {
+//                                        Text(product.name)
+//                                            .font(.headline)
+//                                            .lineLimit(1)
+//                                        
+//                                        Text(product.price)
+//                                            .font(.subheadline)
+//                                            .foregroundColor(.secondary)
+//                                    }
+//                                    .padding()
+//                                }
+//                                .background(Color.white)
+//                                .cornerRadius(8)
+//                                .shadow(radius: 2)
+//                            }
+//                        }
+//                        .padding()
+//                    }
+//                    .coordinateSpace(name: "scroll")
+//                    .onPreferenceChange(ScrollOffsetKey.self) { newOffset in
+//                        withAnimation(.easeInOut(duration: 0.2)) {
+//                            hideNavBar = newOffset < lastScrollOffset
+//                        }
+//                        lastScrollOffset = newOffset
+//                    }
+//                }
+//            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button(action: {
+//                        withAnimation {
+//                            isSearching.toggle()
+//                        }
+//                        if isSearching {
+//                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+//                                isFocused = true
+//                            }
+//                        } else {
+//                            resetSearch()
+//                        }
+//                    }) {
+//                        Image(systemName: "magnifyingglass")
+//                            .frame(width: 24, height: 24)
+//                    }
+//                }
+//            }
+//            .onChange(of: searchText) { _, _ in debounceSearch() }
+//            .onAppear {
+//                filteredData = Product.dummyData
+//            }
+//            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+//        }
+//    }
     
     private var searchBar: some View {
         HStack(spacing: 8) {
