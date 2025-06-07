@@ -68,37 +68,40 @@ struct CachedImageViewer: View {
     @State private var loadedImage: UIImage?
     
     var body: some View {
-        VStack {
-            if let url = URL(string: "https://d3sftlgbtusmnv.cloudfront.net/blog/wp-content/uploads/2025/01/Al-Aqsa-Mosque-Cover-Photo-840x425.jpg") {
-                CachedAsyncImage(url: url) { image in
-                    if let image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .onTapGesture {
-                                loadedImage = image
-                                isPresented.toggle()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    print("Loaded image set:", loadedImage != nil)
+        NavigationStack {
+            VStack {
+                if let url = URL(string: "https://d3sftlgbtusmnv.cloudfront.net/blog/wp-content/uploads/2025/01/Al-Aqsa-Mosque-Cover-Photo-840x425.jpg") {
+                    CachedAsyncImage(url: url) { image in
+                        if let image {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .onTapGesture {
+                                    loadedImage = image
+                                    isPresented.toggle()
                                 }
-                            }
-                    } else {
-                        ProgressView()
+                        } else {
+                            ProgressView()
+                        }
                     }
+                    .clipped()
+                    .cornerRadius(8)
+                    .background(Color.white)
+                    .background(Color(uiColor: .blue))
                 }
-                .clipped()
-                .cornerRadius(8)
-                .background(Color.white)
-                .background(Color(uiColor: .blue))
             }
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(uiColor: .secondarySystemBackground))
+            .ignoresSafeArea()
+            .navigationDestination(isPresented: $isPresented) {
+                DetailsView(image: $loadedImage, isPresented: $isPresented)
+            }
+//            .popover(isPresented: $isPresented) {
+//                DetailsView(image: $loadedImage, isPresented: $isPresented)
+//            }
         }
-        .popover(isPresented: $isPresented) {
-            DetailsView(image: $loadedImage, isPresented: $isPresented)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .ignoresSafeArea()
+
     }
 
 }
