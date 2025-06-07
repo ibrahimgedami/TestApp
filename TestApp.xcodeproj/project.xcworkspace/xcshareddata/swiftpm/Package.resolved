@@ -1,5 +1,5 @@
 {
-  "originHash" : "29f13033780c14a578d6c38820741b0cc4a6e1663541e4e038cbd1a412b77aee",
+  "originHash" : "94e03ef585533fa704dde64609762a5e6a6842ad7cf9253b318ce061f4c53e5c",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -44,6 +44,15 @@
       "state" : {
         "branch" : "development",
         "revision" : "f71b79555a0485b2c8a5d015276ac57860948867"
+      }
+    },
+    {
+      "identity" : "eznetworking",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Aldo10012/EZNetworking.git",
+      "state" : {
+        "revision" : "d55876360478b624676ba54b6473bb4dfc14d2c5",
+        "version" : "3.2.1"
       }
     },
     {

@@ -14,7 +14,9 @@ struct TestAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            StickyHeaderContainer()
+            NavigationStack {
+                CustomerInfoGridView()
+            }
         }
     }
     
