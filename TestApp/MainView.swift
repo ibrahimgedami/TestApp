@@ -6,9 +6,7 @@
 //
 
 import SwiftUI
-import AppBase
-
-import SwiftUI
+import UIKit
 import AVKit
 
 // MARK: - Media Model
@@ -141,7 +139,7 @@ struct MediaPagerView: View {
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
             .background(Color.black)
             .onAppear {
-                startAutoScroll(proxy: proxy)
+//                startAutoScroll(proxy: proxy)
             }
             .onDisappear {
                 stopAutoScroll()
@@ -153,9 +151,7 @@ struct MediaPagerView: View {
     private func mediaView(for item: MediaItem) -> some View {
         switch item.type {
         case .image(let image):
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
+            ZoomableImageView(image: image)
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
                 .onDisappear {
@@ -211,4 +207,70 @@ struct MediaViewer: View {
 
 #Preview {
     MediaViewer()
+}
+
+struct ZoomableImageView: UIViewRepresentable {
+    let image: UIImage
+    
+    func makeUIView(context: Context) -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.delegate = context.coordinator
+        
+        scrollView.minimumZoomScale = 1.0
+        scrollView.maximumZoomScale = 5.0
+        
+        let imageView = UIImageView(image: image)
+        imageView.contentMode = .scaleAspectFit
+        imageView.isUserInteractionEnabled = true
+        imageView.frame = scrollView.bounds
+        imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        scrollView.addSubview(imageView)
+        context.coordinator.imageView = imageView
+        
+        // Enable zoom bouncing
+        scrollView.bouncesZoom = true
+        
+        return scrollView
+    }
+    
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+        // If you want to reset zoom when image changes, add logic here
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator: NSObject, UIScrollViewDelegate {
+        var imageView: UIImageView?
+        
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+            imageView
+        }
+        
+        func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            guard let imageView = imageView else { return }
+            
+            let boundsSize = scrollView.bounds.size
+            var frameToCenter = imageView.frame
+            
+            // Center horizontally
+            if frameToCenter.size.width < boundsSize.width {
+                frameToCenter.origin.x = (boundsSize.width - frameToCenter.size.width) / 2
+            } else {
+                frameToCenter.origin.x = 0
+            }
+            
+            // Center vertically
+            if frameToCenter.size.height < boundsSize.height {
+                frameToCenter.origin.y = (boundsSize.height - frameToCenter.size.height) / 2
+            } else {
+                frameToCenter.origin.y = 0
+            }
+            
+            imageView.frame = frameToCenter
+        }
+    }
+
 }
