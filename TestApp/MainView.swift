@@ -8,250 +8,207 @@
 import SwiftUI
 import AppBase
 
-struct JobCardModule: Identifiable {
+import SwiftUI
+import AVKit
+
+// MARK: - Media Model
+enum MediaType: Equatable {
+    
+    case image(UIImage)
+    case video(URL)
+    
+    static func == (lhs: MediaType, rhs: MediaType) -> Bool {
+        switch (lhs, rhs) {
+        case (.image(let lImage), .image(let rImage)):
+            return lImage.pngData() == rImage.pngData()
+        case (.video(let lURL), .video(let rURL)):
+            return lURL == rURL
+        default:
+            return false
+        }
+    }
+    
+}
+
+struct MediaItem: Identifiable, Equatable {
     
     let id = UUID()
-    let title: String
-    let imageName: String
+    let type: MediaType
     
 }
 
-//struct JobCardGridView: View {
-//    
-//    let modules: [JobCardModule] = [
-//        JobCardModule(title: "Tracking", imageName: "location.viewfinder"),
-//        JobCardModule(title: "Creation", imageName: "plus.square.on.square"),
-//        JobCardModule(title: "Delivery", imageName: "shippingbox")
-//    ]
-//    
-//    let columns = [
-//        GridItem(.flexible(), spacing: 15)]
-//    
-//    var body: some View {
-//        ScrollView {
-//            LazyVGrid(columns: columns, spacing: 20) {
-//                ForEach(modules) { module in
-//                    Button {
-//                        
-//                    } label: {
-//                        VStack(spacing: 20){
-//                            Image(systemName: module.imageName)
-//                                .resizable()
-//                                .scaledToFit()
-//                                .frame(width: .infinity)
-//                                .frame(maxHeight: 150)
-//                                .foregroundColor(.blue)
-//                            
-//                            Text(module.title)
-//                                .font(.headline)
-//                                .foregroundStyle(.primary)
-//                                .padding()
-//                                .frame(width: .infinity)
-//                                .background(
-//                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-//                                        .foregroundStyle(.white)
-//                                )
-//                        }
-//                        .padding()
-//                        .frame(maxWidth: .infinity, minHeight: 150)
-//                        .background(Color(.systemGray6))
-//                        .cornerRadius(16)
-//                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-//                    }
-//                }
-//            }
-//            .padding()
-//        }
-//    }
-//    
-//}
-
-struct JobCardGridView: View {
+// MARK: - Media List View
+struct MediaListView: View {
     
-    let modules: [JobCardModule] = [
-        JobCardModule(title: "Tracking", imageName: "location.viewfinder"),
-        JobCardModule(title: "Creation", imageName: "plus.square.on.square"),
-        JobCardModule(title: "Delivery", imageName: "shippingbox")
-    ]
+    let mediaItems: [MediaItem]
+    @State private var currentIndex = 0
+    @State private var timer: Timer?
     
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    
-    private var gridItemMinWidth: CGFloat {
-        horizontalSizeClass == .compact ? 160 : 220
-    }
-    
-    private var gridItemHeight: CGFloat {
-        dynamicTypeSize > .large ? 180 : 160
-    }
-    
-    private var columns: [GridItem] {
-        [GridItem(.adaptive(minimum: gridItemMinWidth), spacing: 10)]
-    }
-    
-    private let cornerRadius: CGFloat = 12
+    private let autoScrollInterval: TimeInterval = 2
     
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(modules) { module in
-                    ZStack(alignment: .bottom) {
-                        Image("cell_background_job_card")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: gridItemHeight)
-                            .frame(maxWidth: .infinity)
-                            .clipped()
-                        
-                        VStack {
-                            Spacer()
-                            Text(module.title)
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .frame(maxWidth: .infinity)
-                                .background(.ultraThinMaterial)
-                                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        NavigationStack {
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(Array(mediaItems.enumerated()), id: \.1.id) { index, item in
+                            NavigationLink {
+                                MediaPagerView(items: mediaItems, startIndex: index)
+                            } label: {
+                                mediaPreview(for: item)
+                                    .frame(width: 250, height: 200)
+                                    .cornerRadius(10)
+                                    .id(index)
+                            }
                         }
-                        .padding()
                     }
-                    .frame(height: gridItemHeight)
-                    .background(Color.clear)
-                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-                    .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius)
-                            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                    )
-                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-                    .onTapGesture {
-                        debugPrint("\(module.title)")
-                    }
+                    .padding(.horizontal)
+                }
+                .onAppear {
+                    startAutoScroll(proxy: proxy)
+                }
+                .onDisappear {
+                    stopAutoScroll()
                 }
             }
-            .padding()
+            .navigationTitle("Media Gallery")
+        }
+    }
+    
+    private func startAutoScroll(proxy: ScrollViewProxy) {
+        // Prevent multiple timers
+        stopAutoScroll()
+        
+        timer = Timer.scheduledTimer(withTimeInterval: autoScrollInterval, repeats: true) { _ in
+            DispatchQueue.main.async {
+                currentIndex = (currentIndex + 1) % mediaItems.count
+                withAnimation {
+                    proxy.scrollTo(currentIndex, anchor: .center)
+                }
+            }
+        }
+    }
+    
+    private func stopAutoScroll() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    @ViewBuilder
+    private func mediaPreview(for item: MediaItem) -> some View {
+        switch item.type {
+        case .image(let image):
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+        case .video:
+            ZStack {
+                Color.black
+                Image(systemName: "play.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .foregroundColor(.white)
+            }
         }
     }
 }
 
-//#Preview {
-//    JobCardGridView()
-//}
 
-import SwiftUI
-import Combine
+// MARK: - Media Pager View
 
-class DeviceOrientationObserver: ObservableObject {
+struct MediaPagerView: View {
     
-    @Published var isLandscape: Bool = UIDevice.current.orientation.isLandscape
+    let items: [MediaItem]
+    @State private var currentIndex: Int
+    @State private var timer: Timer?
+    private let autoScrollInterval: TimeInterval = 3
     
-    private var cancellable: AnyCancellable?
-    
-    init() {
-        isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
-        
-        cancellable = NotificationCenter.default
-            .publisher(for: UIDevice.orientationDidChangeNotification)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                let screen = UIScreen.main.bounds
-                self.isLandscape = screen.width > screen.height
-            }
+    init(items: [MediaItem], startIndex: Int) {
+        self.items = items
+        _currentIndex = State(initialValue: startIndex)
     }
-    
-    deinit {
-        cancellable?.cancel()
-    }
-}
-
-import SwiftUI
-import AppBase
-import SSSwiftUISpinnerButton
-
-struct SaveButtonView: View {
-    
-    @Binding var isAnimating: Bool
-    let action: () -> Void
-    
-    @StateObject private var orientationObserver = DeviceOrientationObserver()
     
     var body: some View {
-        let isIpad = UIDevice.current.userInterfaceIdiom == .pad
-        let screenWidth = UIScreen.main.bounds.width
-        
-        let width: CGFloat = {
-            if isIpad {
-                return orientationObserver.isLandscape ? screenWidth - 20 : 300
-            } else {
-                return screenWidth - 20
-            }
-        }()
-        
-        VStack {
-            SpinnerButton(
-                buttonAction: action,
-                isAnimating: $isAnimating,
-                buttonStyle: customSpinnerButtonStyle(width: width),
-                animationType: SpinnerButtonAnimationStyle.arcsRotateChase(count: 3, width: 2, spacing: 2)
-            ) {
-                HStack {
-                    Text("Save")
-                        .font(.proximaBold(size: 22))
+        ScrollViewReader { proxy in
+            TabView(selection: $currentIndex) {
+                ForEach(0..<items.count, id: \.self) { index in
+                    mediaView(for: items[index])
+                        .tag(index)
+                        .ignoresSafeArea()
                 }
-                .foregroundStyle(Color.white)
+            }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
+            .background(Color.black)
+            .onAppear {
+                startAutoScroll(proxy: proxy)
+            }
+            .onDisappear {
+                stopAutoScroll()
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 20)
-        .frame(height: 60)
     }
+    
+    @ViewBuilder
+    private func mediaView(for item: MediaItem) -> some View {
+        switch item.type {
+        case .image(let image):
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+        case .video(let url):
+            VideoPlayer(player: AVPlayer(url: url))
+                .onDisappear {
+                    AVPlayer(url: url).pause()
+                }
+        }
+    }
+    
+    private func startAutoScroll(proxy: ScrollViewProxy) {
+        // Prevent multiple timers
+        stopAutoScroll()
+        
+        timer = Timer.scheduledTimer(withTimeInterval: autoScrollInterval, repeats: true) { _ in
+            DispatchQueue.main.async {
+                currentIndex = (currentIndex + 1) % items.count
+                withAnimation {
+                    proxy.scrollTo(currentIndex, anchor: .center)
+                }
+            }
+        }
+    }
+    
+    private func stopAutoScroll() {
+        timer?.invalidate()
+        timer = nil
+    }
+
 }
 
-struct SaveButtonViewer: View {
-    
-    @State var isAnimate = false
+// MARK: - Sample Data for Testing
+
+struct MediaViewer: View {
     
     var body: some View {
-        ScrollView {
-            VStack {
-                Text("Form")
-                Spacer()
-                
-                SaveButtonView(isAnimating: $isAnimate) {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        isAnimate = false
-                    }
-                }
-            }
-        }
+        MediaListView(mediaItems: sampleMediaItems)
     }
     
+    var sampleMediaItems: [MediaItem] {
+        let image1 = UIImage(named: "cell_background_job_card")!
+        let image2 = UIImage(named: "cell_background_job_card")!
+        let videoURL = Bundle.main.url(forResource: "Watch product video for Easycase", withExtension: "mp4")!
+        
+        return [
+            MediaItem(type: .image(image1)),
+            MediaItem(type: .video(videoURL)),
+            MediaItem(type: .image(image2)),
+            MediaItem(type: .video(videoURL))
+        ]
+    }
 }
 
-public extension View {
- 
-    func customSpinnerButtonStyle(width: CGFloat? = 120) -> SpinnerButtonViewStyle {
-        var buttonStyle = SpinnerButtonViewStyle()
-        if let width {
-            buttonStyle.width = width
-        } else {
-            buttonStyle.width = .infinity
-        }
-        buttonStyle.cornerRadius = buttonStyle.height / 2
-        buttonStyle.backgroundColor = Color(.blue)
-        buttonStyle.spinningButtonBackgroundColor = .blue
-        buttonStyle.spinningStrokeColor = .green
-        buttonStyle.borderWidth = 1
-        buttonStyle.borderColor = .blue
-        buttonStyle.shadowColor = .blue
-        buttonStyle.shadowRadius = 1
-        buttonStyle.shadowOffset = CGPoint(x: 0, y: 2)
-        return buttonStyle
-    }
-    
-}
+// MARK: - Preview
 
 #Preview {
-    SaveButtonViewer()
+    MediaViewer()
 }

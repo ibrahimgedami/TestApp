@@ -21,6 +21,7 @@
 		05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B177192DD8C4D000697606 /* CurveSegement.swift */; };
 		05CE8F4A2DDC995400E88223 /* SearchableModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05CE8F492DDC995400E88223 /* SearchableModifier.swift */; };
 		05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D027262D5C904D00A82D32 /* SelectionView.swift */; };
+		05E47F032DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 05E47F022DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 */; };
 		05E966922DF2D6CA00401018 /* NetworkDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E966912DF2D6CA00401018 /* NetworkDemo.swift */; };
 		05E966952DF2D6EB00401018 /* EZNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 05E966942DF2D6EB00401018 /* EZNetworking */; };
 		05E966982DF43BC800401018 /* CachedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E966972DF43BC800401018 /* CachedImage.swift */; };
@@ -51,6 +52,7 @@
 		05B177192DD8C4D000697606 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
 		05CE8F492DDC995400E88223 /* SearchableModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableModifier.swift; sourceTree = "<group>"; };
 		05D027262D5C904D00A82D32 /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionView.swift; sourceTree = "<group>"; };
+		05E47F022DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Watch product video for Easycase.mp4"; sourceTree = "<group>"; };
 		05E966912DF2D6CA00401018 /* NetworkDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkDemo.swift; sourceTree = "<group>"; };
 		05E966972DF43BC800401018 /* CachedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedImage.swift; sourceTree = "<group>"; };
 		05EB5DE72D6905B30077047F /* SwipeableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeableAction.swift; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 		DDB902F62BF36CCD00A2FF5A /* TestApp */ = {
 			isa = PBXGroup;
 			children = (
+				05E47F022DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 */,
 				05E966962DF43BB300401018 /* CacheImage */,
 				05E966902DF2D6B900401018 /* Network */,
 				05227B592DDF189A007DB8FB /* Info.plist */,
@@ -267,6 +270,7 @@
 				05A9CE682DED6D6300880782 /* Interactions.json in Resources */,
 				DDB903002BF36CCF00A2FF5A /* Preview Assets.xcassets in Resources */,
 				050943C92D4742360046A401 /* FilterViewController.xib in Resources */,
+				05E47F032DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 in Resources */,
 				050943CA2D4742360046A401 /* FilterTableViewCell.xib in Resources */,
 				DDB902FC2BF36CCF00A2FF5A /* Assets.xcassets in Resources */,
 			);
