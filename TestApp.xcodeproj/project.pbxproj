@@ -22,7 +22,7 @@
 		05CE8F4A2DDC995400E88223 /* SearchableModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05CE8F492DDC995400E88223 /* SearchableModifier.swift */; };
 		05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D027262D5C904D00A82D32 /* SelectionView.swift */; };
 		05E47F032DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 05E47F022DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 */; };
-		05E966952DF2D6EB00401018 /* EZNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 05E966942DF2D6EB00401018 /* EZNetworking */; };
+		05E47F062DF9E26E00889EC0 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 05E47F052DF9E26E00889EC0 /* Kingfisher */; };
 		05E966982DF43BC800401018 /* CachedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E966972DF43BC800401018 /* CachedImage.swift */; };
 		05EB5DE82D6905B30077047F /* SwipeableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EB5DE72D6905B30077047F /* SwipeableAction.swift */; };
 		DD0E3E762CFDFF0A005ECD21 /* PDFUIViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0E3E752CFDFF0A005ECD21 /* PDFUIViewWrapper.swift */; };
@@ -68,10 +68,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05E47F062DF9E26E00889EC0 /* Kingfisher in Frameworks */,
 				DD0E3E792D002F5B005ECD21 /* AppBase in Frameworks */,
 				DDDF71972D1807A10063EF5A /* CombineNetwork in Frameworks */,
 				0547E89B2DF96D1900A38877 /* SSSwiftUISpinnerButton in Frameworks */,
-				05E966952DF2D6EB00401018 /* EZNetworking in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,8 +200,8 @@
 			packageProductDependencies = (
 				DD0E3E782D002F5B005ECD21 /* AppBase */,
 				DDDF71962D1807A10063EF5A /* CombineNetwork */,
-				05E966942DF2D6EB00401018 /* EZNetworking */,
 				0547E89A2DF96D1900A38877 /* SSSwiftUISpinnerButton */,
+				05E47F052DF9E26E00889EC0 /* Kingfisher */,
 			);
 			productName = TestApp;
 			productReference = DDB902F42BF36CCD00A2FF5A /* TestApp.app */;
@@ -234,8 +234,8 @@
 			packageReferences = (
 				DD0E3E772D002F5B005ECD21 /* XCRemoteSwiftPackageReference "AppBase" */,
 				DDDF71952D1807A10063EF5A /* XCRemoteSwiftPackageReference "CombineNetwork" */,
-				05E966932DF2D6EB00401018 /* XCRemoteSwiftPackageReference "EZNetworking" */,
 				0547E8992DF96D1900A38877 /* XCRemoteSwiftPackageReference "SSSwiftUISpinnerButton" */,
+				05E47F042DF9E26E00889EC0 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = DDB902F52BF36CCD00A2FF5A /* Products */;
 			projectDirPath = "";
@@ -513,12 +513,12 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		05E966932DF2D6EB00401018 /* XCRemoteSwiftPackageReference "EZNetworking" */ = {
+		05E47F042DF9E26E00889EC0 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Aldo10012/EZNetworking.git";
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 3.2.1;
+				minimumVersion = 8.3.2;
 			};
 		};
 		DD0E3E772D002F5B005ECD21 /* XCRemoteSwiftPackageReference "AppBase" */ = {
@@ -545,10 +545,10 @@
 			package = 0547E8992DF96D1900A38877 /* XCRemoteSwiftPackageReference "SSSwiftUISpinnerButton" */;
 			productName = SSSwiftUISpinnerButton;
 		};
-		05E966942DF2D6EB00401018 /* EZNetworking */ = {
+		05E47F052DF9E26E00889EC0 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 05E966932DF2D6EB00401018 /* XCRemoteSwiftPackageReference "EZNetworking" */;
-			productName = EZNetworking;
+			package = 05E47F042DF9E26E00889EC0 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		DD0E3E782D002F5B005ECD21 /* AppBase */ = {
 			isa = XCSwiftPackageProductDependency;

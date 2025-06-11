@@ -1,5 +1,5 @@
 {
-  "originHash" : "bf49ce8d54d64b1814026d4f05f9861d8cb5070bd09fbe7c4ecca2779b35d3be",
+  "originHash" : "d866c8384d98283031a439cf242caa0262ebbf9002ff621d7b741334685a4cb8",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -47,12 +47,12 @@
       }
     },
     {
-      "identity" : "eznetworking",
+      "identity" : "kingfisher",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Aldo10012/EZNetworking.git",
+      "location" : "https://github.com/onevcat/Kingfisher",
       "state" : {
-        "revision" : "d55876360478b624676ba54b6473bb4dfc14d2c5",
-        "version" : "3.2.1"
+        "revision" : "7deda23bbdca612076c5c315003d8638a08ed0f1",
+        "version" : "8.3.2"
       }
     },
     {

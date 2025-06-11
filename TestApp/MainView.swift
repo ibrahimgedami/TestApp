@@ -8,17 +8,21 @@
 import SwiftUI
 import UIKit
 import AVKit
+import Kingfisher
 
 // MARK: - Media Model
 enum MediaType: Equatable {
     
     case image(UIImage)
+    case imageURL(URL)
     case video(URL)
     
     static func == (lhs: MediaType, rhs: MediaType) -> Bool {
         switch (lhs, rhs) {
         case (.image(let lImage), .image(let rImage)):
             return lImage.pngData() == rImage.pngData()
+        case (.imageURL(let lURL), .imageURL(let rURL)):
+            return lURL == rURL
         case (.video(let lURL), .video(let rURL)):
             return lURL == rURL
         default:
@@ -108,6 +112,15 @@ struct MediaListView: View {
                     .frame(width: 50, height: 50)
                     .foregroundColor(.white)
             }
+        case .imageURL(let url):
+            KFImage(url)
+                .resizable()
+                .placeholder {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.gray.opacity(0.3))
+                }
+                .scaledToFill()
         }
     }
 }
@@ -152,6 +165,10 @@ struct MediaPagerView: View {
         switch item.type {
         case .image(let image):
             ZoomableImageView(image: image)
+            
+        case .imageURL(let url):
+            ZoomableRemoteImageView(url: url)
+            
         case .video(let url):
             VideoPlayer(player: AVPlayer(url: url))
                 .onDisappear {
@@ -192,13 +209,15 @@ struct MediaViewer: View {
     var sampleMediaItems: [MediaItem] {
         let image1 = UIImage(named: "cell_background_job_card")!
         let image2 = UIImage(named: "cell_background_job_card")!
+        let image3 = URL(string: "https://cdn.pixabay.com/photo/2015/04/23/22/00/new-year-background-736885_1280.jpg")!
         let videoURL = Bundle.main.url(forResource: "Watch product video for Easycase", withExtension: "mp4")!
         
         return [
             MediaItem(type: .image(image1)),
             MediaItem(type: .video(videoURL)),
             MediaItem(type: .image(image2)),
-            MediaItem(type: .video(videoURL))
+            MediaItem(type: .video(videoURL)),
+            MediaItem(type: .imageURL(image3))
         ]
     }
 }
@@ -263,6 +282,78 @@ struct ZoomableImageView: UIViewRepresentable {
             }
             
             // Center vertically
+            if frameToCenter.size.height < boundsSize.height {
+                frameToCenter.origin.y = (boundsSize.height - frameToCenter.size.height) / 2
+            } else {
+                frameToCenter.origin.y = 0
+            }
+            
+            imageView.frame = frameToCenter
+        }
+    }
+
+}
+
+struct ZoomableRemoteImageView: UIViewRepresentable {
+    
+    let url: URL
+    
+    func makeUIView(context: Context) -> UIScrollView {
+        let scrollView = UIScrollView()
+        scrollView.delegate = context.coordinator
+        
+        scrollView.minimumZoomScale = 1.0
+        scrollView.maximumZoomScale = 5.0
+        
+        context.coordinator.imageView.contentMode = .scaleAspectFit
+        context.coordinator.imageView.isUserInteractionEnabled = true
+        context.coordinator.imageView.frame = scrollView.bounds
+        context.coordinator.imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        scrollView.addSubview(context.coordinator.imageView)
+        scrollView.bouncesZoom = true
+        
+        context.coordinator.loadImage(from: url)
+        
+        return scrollView
+    }
+    
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+        // no update needed here for now
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator: NSObject, UIScrollViewDelegate {
+        var imageView = UIImageView()
+        
+        func loadImage(from url: URL) {
+            // Simple async load - you can replace with your favorite caching lib (Kingfisher, SDWebImage, etc.)
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let data = data, let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.imageView.image = image
+                    }
+                }
+            }.resume()
+        }
+        
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+            imageView
+        }
+        
+        func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            let boundsSize = scrollView.bounds.size
+            var frameToCenter = imageView.frame
+            
+            if frameToCenter.size.width < boundsSize.width {
+                frameToCenter.origin.x = (boundsSize.width - frameToCenter.size.width) / 2
+            } else {
+                frameToCenter.origin.x = 0
+            }
+            
             if frameToCenter.size.height < boundsSize.height {
                 frameToCenter.origin.y = (boundsSize.height - frameToCenter.size.height) / 2
             } else {
