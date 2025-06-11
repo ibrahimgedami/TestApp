@@ -8,252 +8,250 @@
 import SwiftUI
 import AppBase
 
-struct CurveSegement: View {
+struct JobCardModule: Identifiable {
     
-    @State var menuString = ["Profile", "Home", "Settings", "Notifi"]
-    @State var selectedIndex: Int = 0
-    @Namespace var animation
+    let id = UUID()
+    let title: String
+    let imageName: String
     
-    // Instead of hardcoded xAxis, calculate dynamically based on GeometryReader
-    @State private var xAxis: CGFloat = 0
+}
+
+//struct JobCardGridView: View {
+//    
+//    let modules: [JobCardModule] = [
+//        JobCardModule(title: "Tracking", imageName: "location.viewfinder"),
+//        JobCardModule(title: "Creation", imageName: "plus.square.on.square"),
+//        JobCardModule(title: "Delivery", imageName: "shippingbox")
+//    ]
+//    
+//    let columns = [
+//        GridItem(.flexible(), spacing: 15)]
+//    
+//    var body: some View {
+//        ScrollView {
+//            LazyVGrid(columns: columns, spacing: 20) {
+//                ForEach(modules) { module in
+//                    Button {
+//                        
+//                    } label: {
+//                        VStack(spacing: 20){
+//                            Image(systemName: module.imageName)
+//                                .resizable()
+//                                .scaledToFit()
+//                                .frame(width: .infinity)
+//                                .frame(maxHeight: 150)
+//                                .foregroundColor(.blue)
+//                            
+//                            Text(module.title)
+//                                .font(.headline)
+//                                .foregroundStyle(.primary)
+//                                .padding()
+//                                .frame(width: .infinity)
+//                                .background(
+//                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+//                                        .foregroundStyle(.white)
+//                                )
+//                        }
+//                        .padding()
+//                        .frame(maxWidth: .infinity, minHeight: 150)
+//                        .background(Color(.systemGray6))
+//                        .cornerRadius(16)
+//                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+//                    }
+//                }
+//            }
+//            .padding()
+//        }
+//    }
+//    
+//}
+
+struct JobCardGridView: View {
+    
+    let modules: [JobCardModule] = [
+        JobCardModule(title: "Tracking", imageName: "location.viewfinder"),
+        JobCardModule(title: "Creation", imageName: "plus.square.on.square"),
+        JobCardModule(title: "Delivery", imageName: "shippingbox")
+    ]
+    
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    
+    private var gridItemMinWidth: CGFloat {
+        horizontalSizeClass == .compact ? 160 : 220
+    }
+    
+    private var gridItemHeight: CGFloat {
+        dynamicTypeSize > .large ? 180 : 160
+    }
+    
+    private var columns: [GridItem] {
+        [GridItem(.adaptive(minimum: gridItemMinWidth), spacing: 10)]
+    }
+    
+    private let cornerRadius: CGFloat = 12
     
     var body: some View {
-        VStack(spacing: 0) {
-            Image("IMG")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 200)
-                .edgesIgnoringSafeArea(.top)
-            
-            GeometryReader { geo in
-                let width = geo.size.width
-                let tabWidth = width / CGFloat(menuString.count)
-                
-                ZStack(alignment: .topLeading) {
-                    CustomShape(xAxis: xAxis, tabCount: menuString.count)
-                        .fill(Color.blue)
-                        .shadow(radius: 2)
-                        .frame(height: 50)
-                        .matchedGeometryEffect(id: "showRect", in: animation)
-                    
-                    HStack(spacing: 0) {
-                        ForEach(menuString.indices, id: \.self) { number in
-                            Text(menuString[number])
-                                .foregroundColor(selectedIndex == number ? .black : .gray.opacity(0.5))
-                                .frame(width: tabWidth, height: 50)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    withAnimation(.easeInOut) {
-                                        selectedIndex = number
-                                        xAxis = tabWidth * CGFloat(number)
-                                    }
-                                }
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(modules) { module in
+                    ZStack(alignment: .bottom) {
+                        Image("cell_background_job_card")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: gridItemHeight)
+                            .frame(maxWidth: .infinity)
+                            .clipped()
+                        
+                        VStack {
+                            Spacer()
+                            Text(module.title)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .frame(maxWidth: .infinity)
+                                .background(.ultraThinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
                         }
+                        .padding()
+                    }
+                    .frame(height: gridItemHeight)
+                    .background(Color.clear)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                    .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .onTapGesture {
+                        debugPrint("\(module.title)")
                     }
                 }
-                .offset(y: -30)
-                .onAppear {
-                    // initialize xAxis on appear for first tab
-                    xAxis = tabWidth * CGFloat(selectedIndex)
-                }
             }
-//            .padding()
-            .frame(height: 50) // fix GeometryReader height
-            
-            Spacer()
-            
-            // Show selected view
-            Group {
-                switch selectedIndex {
-                case 0:
-                    FirstView()
-                case 1:
-                    SecondView()
-                case 2:
-                    ThirdView()
-                case 3:
-                    FourthView()
-                default:
-                    EmptyView()
-                }
-            }
-            
-            Spacer()
+            .padding()
         }
     }
 }
 
-struct CustomShape: Shape {
-    
-    var xAxis: CGFloat
-    var tabCount: Int = 4  // You can pass this from outside if needed
-    
-    var animatableData: CGFloat {
-        get { xAxis }
-        set { xAxis = newValue }
-    }
-    
-    func path(in rect: CGRect) -> Path {
-        let tabWidth = rect.width / CGFloat(tabCount)
-        // Center of the curve is at xAxis + half tabWidth
-        let center = xAxis + tabWidth / 2
-        
-        // Curve width and height relative to tabWidth
-        let curveWidth = tabWidth * 0.75
-        let curveHeight: CGFloat = 45
-        
-        let leftCurveStart = center - curveWidth / 1.3
-        let rightCurveEnd = center + curveWidth / 1.3
-        
-        return Path { path in
-            // Draw outer rectangle
-            path.move(to: CGPoint(x: 0, y: 0))
-            path.addLine(to: CGPoint(x: rect.width, y: 0))
-            path.addLine(to: CGPoint(x: rect.width, y: rect.height))
-            path.addLine(to: CGPoint(x: 0, y: rect.height))
-            path.closeSubpath()
-            
-            // Draw top curved bump
-            path.move(to: CGPoint(x: leftCurveStart, y: 0))
-            let to1 = CGPoint(x: center, y: curveHeight)
-            let control1 = CGPoint(x: leftCurveStart + curveWidth * 0.3, y: 0)
-            let control2 = CGPoint(x: leftCurveStart + curveWidth * 0.1, y: curveHeight)
-            
-            let to2 = CGPoint(x: rightCurveEnd, y: 0)
-            let control3 = CGPoint(x: rightCurveEnd - curveWidth * 0.1, y: curveHeight)
-            let control4 = CGPoint(x: rightCurveEnd - curveWidth * 0.3, y: 0)
-            
-            path.addCurve(to: to1, control1: control1, control2: control2)
-            path.addCurve(to: to2, control1: control3, control2: control4)
-        }
-    }
+//#Preview {
+//    JobCardGridView()
+//}
 
+import SwiftUI
+import Combine
+
+class DeviceOrientationObserver: ObservableObject {
+    
+    @Published var isLandscape: Bool = UIDevice.current.orientation.isLandscape
+    
+    private var cancellable: AnyCancellable?
+    
+    init() {
+        isLandscape = UIScreen.main.bounds.width > UIScreen.main.bounds.height
+        
+        cancellable = NotificationCenter.default
+            .publisher(for: UIDevice.orientationDidChangeNotification)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                let screen = UIScreen.main.bounds
+                self.isLandscape = screen.width > screen.height
+            }
+    }
+    
+    deinit {
+        cancellable?.cancel()
+    }
 }
 
-#Preview(body: {
-    CurveSegement()
-})
+import SwiftUI
+import AppBase
+import SSSwiftUISpinnerButton
 
-struct FirstView: View {
+struct SaveButtonView: View {
     
-    @State var isAnimated: Bool = false
+    @Binding var isAnimating: Bool
+    let action: () -> Void
+    
+    @StateObject private var orientationObserver = DeviceOrientationObserver()
     
     var body: some View {
+        let isIpad = UIDevice.current.userInterfaceIdiom == .pad
+        let screenWidth = UIScreen.main.bounds.width
+        
+        let width: CGFloat = {
+            if isIpad {
+                return orientationObserver.isLandscape ? screenWidth - 20 : 300
+            } else {
+                return screenWidth - 20
+            }
+        }()
+        
         VStack {
-            Image(systemName: "person.fill")
-                .resizable()
-                .font(.system(size: 150))
-                .foregroundStyle(.orange.gradient)
-            
-            Text("Profile View")
-                .font(.title)
-                .foregroundStyle(.white.gradient)
-            
-            Text("Description Profile View")
-                .font(.caption)
-                .foregroundStyle(.white.gradient)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-        }
-        .opacity(isAnimated ? 1 : 0)
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.8)) {
-                isAnimated.toggle()
+            SpinnerButton(
+                buttonAction: action,
+                isAnimating: $isAnimating,
+                buttonStyle: customSpinnerButtonStyle(width: width),
+                animationType: SpinnerButtonAnimationStyle.arcsRotateChase(count: 3, width: 2, spacing: 2)
+            ) {
+                HStack {
+                    Text("Save")
+                        .font(.proximaBold(size: 22))
+                }
+                .foregroundStyle(Color.white)
             }
         }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20)
+        .frame(height: 60)
     }
-
 }
 
-struct SecondView: View {
+struct SaveButtonViewer: View {
     
-    @State var isAnimated: Bool = false
+    @State var isAnimate = false
     
     var body: some View {
-        ZStack {
+        ScrollView {
             VStack {
-                Image(systemName: "house.fill")
-                    .resizable()
-                    .frame(width: 150, height: 150)
-                    .foregroundStyle(.blue.gradient)
+                Text("Form")
+                Spacer()
                 
-                Text("Home View")
-                    .font(.title)
-                    .foregroundStyle(.white.gradient)
-                
-                Text("Description Home View")
-                    .font(.caption)
-                    .foregroundStyle(.white.gradient)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-            }
-            .opacity(isAnimated ? 1 : 0)
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.8)) {
-                    isAnimated.toggle()
+                SaveButtonView(isAnimating: $isAnimate) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        isAnimate = false
+                    }
                 }
             }
         }
     }
+    
 }
 
-struct ThirdView: View {
-    
-    @State var isAnimated: Bool = false
-    
-    var body: some View {
-        VStack {
-            Image(systemName: "gearshape.fill")
-                .resizable()
-                .frame(width: 150, height: 150)
-                .foregroundStyle(.green.gradient)
-            
-            Text("Settings View")
-                .font(.title)
-                .foregroundStyle(.white.gradient)
-            
-            Text("Description Settings View")
-                .font(.caption)
-                .foregroundStyle(.white.gradient)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+public extension View {
+ 
+    func customSpinnerButtonStyle(width: CGFloat? = 120) -> SpinnerButtonViewStyle {
+        var buttonStyle = SpinnerButtonViewStyle()
+        if let width {
+            buttonStyle.width = width
+        } else {
+            buttonStyle.width = .infinity
         }
-        .opacity(isAnimated ? 1 : 0)
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.8)) {
-                isAnimated.toggle()
-            }
-        }
+        buttonStyle.cornerRadius = buttonStyle.height / 2
+        buttonStyle.backgroundColor = Color(.blue)
+        buttonStyle.spinningButtonBackgroundColor = .blue
+        buttonStyle.spinningStrokeColor = .green
+        buttonStyle.borderWidth = 1
+        buttonStyle.borderColor = .blue
+        buttonStyle.shadowColor = .blue
+        buttonStyle.shadowRadius = 1
+        buttonStyle.shadowOffset = CGPoint(x: 0, y: 2)
+        return buttonStyle
     }
+    
 }
 
-struct FourthView: View {
-    
-    @State var isAnimated: Bool = false
-    
-    var body: some View {
-            VStack {
-                Image(systemName: "bell.fill")
-                    .resizable()
-                    .frame(width: 150, height: 150)
-                    .foregroundStyle(.red.gradient)
-                
-                Text("Notifications View")
-                    .font(.title)
-                    .foregroundStyle(.white.gradient)
-                
-                Text("Description Notifications View")
-                    .font(.caption)
-                    .foregroundStyle(.white.gradient)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-            }
-            .opacity(isAnimated ? 1 : 0)
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.8)) {
-                    isAnimated.toggle()
-                }
-            }
-    }
-
+#Preview {
+    SaveButtonViewer()
 }

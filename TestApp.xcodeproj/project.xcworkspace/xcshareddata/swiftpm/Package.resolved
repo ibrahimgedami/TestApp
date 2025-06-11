@@ -1,5 +1,5 @@
 {
-  "originHash" : "94e03ef585533fa704dde64609762a5e6a6842ad7cf9253b318ce061f4c53e5c",
+  "originHash" : "bf49ce8d54d64b1814026d4f05f9861d8cb5070bd09fbe7c4ecca2779b35d3be",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -62,6 +62,15 @@
       "state" : {
         "revision" : "121455c4e630fcb95aaefd7e4257b0c2e3cfe6d5",
         "version" : "5.2.0"
+      }
+    },
+    {
+      "identity" : "ssswiftuispinnerbutton",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mobile-simformsolutions/SSSwiftUISpinnerButton.git",
+      "state" : {
+        "revision" : "e2b8ccd95a1f638ec2ba36cbcead6ac57c6d6255",
+        "version" : "1.0.0"
       }
     },
     {
