@@ -5,6 +5,20 @@
 //  Created by Ibrahim Gedami on 22/05/2025.
 //
 
+/*
+ 
+ https://github.com/amrangry/AASignatureView 2.1.0
+ https://github.com/seddiqiholding/CombineNetwork.git main
+ https://github.com/seddiqiholding/CustomSwiftUIFloatingTextField.git main
+ https://github.com/seddiqiholding/FloatingBorderTextField.git main
+ https://github.com/kishanraja/FloatingLabelTextFieldSwiftUI.git 5.0.0
+ https://github.com/hackiftekhar/IQKeyboardManager.git 8.0.0
+ https://github.com/seddiqiholding/JobCardDisplay.git refactoring_display_model
+ https://github.com/mobile-simformsolutions/SSSwiftUISpinnerButton.git 1.0.0
+ https://github.com/marmelroy/Zip.git 2.1.2
+ 
+ */
+
 import SwiftUI
 
 struct Product: Identifiable {

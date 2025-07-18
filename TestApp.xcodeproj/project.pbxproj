@@ -16,6 +16,8 @@
 		05167DF42DE30233003ED899 /* StickyHeaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05167DF32DE30233003ED899 /* StickyHeaderContainer.swift */; };
 		05227B582DDF162C007DB8FB /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05227B572DDF1628007DB8FB /* Product.swift */; };
 		0547E89B2DF96D1900A38877 /* SSSwiftUISpinnerButton in Frameworks */ = {isa = PBXBuildFile; productRef = 0547E89A2DF96D1900A38877 /* SSSwiftUISpinnerButton */; };
+		0553E1B62E2A2E970061FAB7 /* CelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0553E1B52E2A2E970061FAB7 /* CelebrationView.swift */; };
+		05A49EC02E0436C200D06E72 /* Eureka in Frameworks */ = {isa = PBXBuildFile; productRef = 05A49EBF2E0436C200D06E72 /* Eureka */; };
 		05A9CE662DED6CB900880782 /* InteractionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A9CE652DED6CB900880782 /* InteractionView.swift */; };
 		05A9CE682DED6D6300880782 /* Interactions.json in Resources */ = {isa = PBXBuildFile; fileRef = 05A9CE672DED6D6300880782 /* Interactions.json */; };
 		05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B177192DD8C4D000697606 /* CurveSegement.swift */; };
@@ -45,6 +47,7 @@
 		05167DF32DE30233003ED899 /* StickyHeaderContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyHeaderContainer.swift; sourceTree = "<group>"; };
 		05227B572DDF1628007DB8FB /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		05227B592DDF189A007DB8FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0553E1B52E2A2E970061FAB7 /* CelebrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationView.swift; sourceTree = "<group>"; };
 		05A9CE652DED6CB900880782 /* InteractionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionView.swift; sourceTree = "<group>"; };
 		05A9CE672DED6D6300880782 /* Interactions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Interactions.json; sourceTree = "<group>"; };
 		05B177192DD8C4D000697606 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
@@ -72,6 +75,7 @@
 				DD0E3E792D002F5B005ECD21 /* AppBase in Frameworks */,
 				DDDF71972D1807A10063EF5A /* CombineNetwork in Frameworks */,
 				0547E89B2DF96D1900A38877 /* SSSwiftUISpinnerButton in Frameworks */,
+				05A49EC02E0436C200D06E72 /* Eureka in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +100,14 @@
 				05167DF32DE30233003ED899 /* StickyHeaderContainer.swift */,
 			);
 			path = StickyHeader;
+			sourceTree = "<group>";
+		};
+		0553E1B42E2A2E7A0061FAB7 /* Celebration */ = {
+			isa = PBXGroup;
+			children = (
+				0553E1B52E2A2E970061FAB7 /* CelebrationView.swift */,
+			);
+			path = Celebration;
 			sourceTree = "<group>";
 		};
 		05A9CE642DED6CA300880782 /* CRM */ = {
@@ -151,6 +163,7 @@
 		DDB902F62BF36CCD00A2FF5A /* TestApp */ = {
 			isa = PBXGroup;
 			children = (
+				0553E1B42E2A2E7A0061FAB7 /* Celebration */,
 				05E47F022DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 */,
 				05E966962DF43BB300401018 /* CacheImage */,
 				05227B592DDF189A007DB8FB /* Info.plist */,
@@ -202,6 +215,7 @@
 				DDDF71962D1807A10063EF5A /* CombineNetwork */,
 				0547E89A2DF96D1900A38877 /* SSSwiftUISpinnerButton */,
 				05E47F052DF9E26E00889EC0 /* Kingfisher */,
+				05A49EBF2E0436C200D06E72 /* Eureka */,
 			);
 			productName = TestApp;
 			productReference = DDB902F42BF36CCD00A2FF5A /* TestApp.app */;
@@ -236,6 +250,7 @@
 				DDDF71952D1807A10063EF5A /* XCRemoteSwiftPackageReference "CombineNetwork" */,
 				0547E8992DF96D1900A38877 /* XCRemoteSwiftPackageReference "SSSwiftUISpinnerButton" */,
 				05E47F042DF9E26E00889EC0 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				05A49EBE2E0436C200D06E72 /* XCRemoteSwiftPackageReference "Eureka" */,
 			);
 			productRefGroup = DDB902F52BF36CCD00A2FF5A /* Products */;
 			projectDirPath = "";
@@ -268,6 +283,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDB902F82BF36CCD00A2FF5A /* TestAppApp.swift in Sources */,
+				0553E1B62E2A2E970061FAB7 /* CelebrationView.swift in Sources */,
 				05EB5DE82D6905B30077047F /* SwipeableAction.swift in Sources */,
 				DD0E3E762CFDFF0A005ECD21 /* PDFUIViewWrapper.swift in Sources */,
 				05167DF42DE30233003ED899 /* StickyHeaderContainer.swift in Sources */,
@@ -513,6 +529,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		05A49EBE2E0436C200D06E72 /* XCRemoteSwiftPackageReference "Eureka" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/xmartlabs/Eureka";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.5.0;
+			};
+		};
 		05E47F042DF9E26E00889EC0 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
@@ -544,6 +568,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0547E8992DF96D1900A38877 /* XCRemoteSwiftPackageReference "SSSwiftUISpinnerButton" */;
 			productName = SSSwiftUISpinnerButton;
+		};
+		05A49EBF2E0436C200D06E72 /* Eureka */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 05A49EBE2E0436C200D06E72 /* XCRemoteSwiftPackageReference "Eureka" */;
+			productName = Eureka;
 		};
 		05E47F052DF9E26E00889EC0 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;

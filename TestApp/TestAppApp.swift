@@ -15,7 +15,7 @@ struct TestAppApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                MediaViewer()
+                CelebrationView()
             }
         }
     }
