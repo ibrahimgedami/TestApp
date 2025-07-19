@@ -6,74 +6,105 @@
 //
 
 import SwiftUI
+import SwipeCellSUI
 
 struct CelebrationView: View {
     
-    @State private var personalCelebrations = ["day one"]
-    @State private var seasonalCelebrations = ["day one", "day one", "Eid", "Birthday", "Eid"]
-
+    // Data
+    @State private var personalCelebrations = ["Day One", "Anniversary"]
+    @State private var seasonalCelebrations = ["Eid", "Birthday", "New Year"]
+    @State private var otherCelebrations = ["Graduation", "Promotion"]
+    
+    // Swipe state
+    @State private var currentUserInteractionCellID: String? = nil
+    
+    // UI Constants
+    private let buttonColumns = [GridItem(.adaptive(minimum: 150), spacing: 16)]
+    private let rowHeight: CGFloat = 50
+    private let rowCornerRadius: CGFloat = 12
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
+                    // MARK: - Action Buttons
+                    actionButtonsSection
                     
-                    // MARK: - Top Buttons
-                    VStack(spacing: 16) {
-                        celebrationButton(title: "Add Personal Celebration")
-                        celebrationButton(title: "Add Other Celebration")
-                        celebrationButton(title: "Add Seasonal Celebration")
-                    }
-                    .padding(.horizontal)
-                    .padding(.top)
-                    
-                    // MARK: - Personal Section
-                    if !personalCelebrations.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Personal")
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal)
-                            
-                            ForEach(personalCelebrations, id: \.self) { item in
-                                celebrationRow(title: item) {
-                                    deleteItem(item, from: &personalCelebrations)
-                                }
-                            }
-                        }
-                    }
-                    
-                    // MARK: - Seasonal Section
-                    if !seasonalCelebrations.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Seasonal")
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal)
-                            
-                            ForEach(seasonalCelebrations, id: \.self) { item in
-                                celebrationRow(title: item) {
-                                    deleteItem(item, from: &seasonalCelebrations)
-                                }
-                            }
-                        }
-                    }
+                    // MARK: - Celebration Lists
+                    celebrationListSection(title: "Personal", items: $personalCelebrations)
+                    celebrationListSection(title: "Seasonal", items: $seasonalCelebrations)
+                    celebrationListSection(title: "Other", items: $otherCelebrations)
                 }
                 .padding(.bottom)
             }
             .navigationTitle("Celebrations")
+            .background(Color(.systemGroupedBackground))
         }
     }
     
-    // MARK: - Celebration Button
-    private func celebrationButton(title: String) -> some View {
-        Button(action: {
-            print("Tapped \(title)")
-        }) {
+    // MARK: - Subviews
+    
+    private var actionButtonsSection: some View {
+        LazyVGrid(columns: buttonColumns, spacing: 16) {
+            celebrationButton(title: "Add Personal", action: { addItem(to: &personalCelebrations) })
+            celebrationButton(title: "Add Seasonal", action: { addItem(to: &seasonalCelebrations) })
+            celebrationButton(title: "Add Other", action: { addItem(to: &otherCelebrations) })
+        }
+        .padding(.horizontal)
+        .padding(.top)
+    }
+    
+    private func celebrationListSection(title: String, items: Binding<[String]>) -> some View {
+        Group {
+            if !items.wrappedValue.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionHeader(title: title)
+                    
+                    ForEach(items.wrappedValue, id: \.self) { item in
+                        SwipeableRow(
+                            title: item,
+                            onDelete: { deleteItem(item, from: items) },
+                            onFavorite: { favoriteItem(item) },
+                            onEdit: { editItem(item, in: items) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Row Actions
+    
+    private func deleteItem(_ item: String, from items: Binding<[String]>) {
+        withAnimation {
+            items.wrappedValue.removeAll { $0 == item }
+        }
+    }
+    
+    private func favoriteItem(_ item: String) {
+        print("Favorite action for \(item)")
+        // Add your favorite logic here
+    }
+    
+    private func editItem(_ item: String, in items: Binding<[String]>) {
+        print("Edit action for \(item)")
+        // Add your edit logic here
+    }
+    
+    private func addItem(to items: inout [String]) {
+        let newItem = "New Event \(items.count + 1)"
+        withAnimation {
+            items.append(newItem)
+        }
+    }
+    
+    // MARK: - UI Components
+    
+    private func celebrationButton(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             Text(title)
                 .font(.callout)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color.brown)
@@ -82,37 +113,91 @@ struct CelebrationView: View {
         }
     }
     
-    // MARK: - Celebration Row with Swipe to Delete
-    private func celebrationRow(title: String, onDelete: @escaping () -> Void) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.secondarySystemBackground))
-                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-            
-            HStack {
-                Text(title)
-                    .padding(.leading, 16)
-                    .foregroundColor(.primary)
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        onDelete()
-                    }
-                }) {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                        .padding(.trailing, 16)
-                }
-            }
-            .frame(height: 50)
+    private struct SectionHeader: View {
+        let title: String
+        
+        var body: some View {
+            Text(title)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
     
-    // MARK: - Deletion Logic
-    private func deleteItem(_ item: String, from list: inout [String]) {
-        if let index = list.firstIndex(of: item) {
-            list.remove(at: index)
+    private struct SwipeableRow: View {
+        let title: String
+        let onDelete: () -> Void
+        let onFavorite: () -> Void
+        let onEdit: () -> Void
+        
+        var body: some View {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .overlay(
+                    HStack {
+                        Text(title)
+                            .foregroundStyle(.primary)
+                            .padding(.leading)
+                        Spacer()
+                    }
+                )
+                .padding(.horizontal)
+                .frame(height: 50)
+                .swipeCell(
+                    id: title,
+                    cellWidth: UIScreen.main.bounds.width - 32,
+                    leadingSideGroup: leadingActions,
+                    trailingSideGroup: trailingActions,
+                    currentUserInteractionCellID: .constant(nil),
+                    settings: SwipeCellSettings()
+                )
+        }
+        
+        private var leadingActions: [SwipeCellActionItem] {
+            [
+                SwipeCellActionItem(
+                    buttonView: {
+                        AnyView(
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.white)
+                                .frame(width: 20, height: 20)
+                        )
+                    },
+                    backgroundColor: .orange,
+                    actionCallback: onFavorite
+                ),
+                SwipeCellActionItem(
+                    buttonView: {
+                        AnyView(
+                            Image(systemName: "pencil")
+                                .foregroundStyle(.white)
+                                .frame(width: 20, height: 20)
+                        )
+                    },
+                    backgroundColor: .blue,
+                    actionCallback: onEdit
+                )
+            ]
+        }
+        
+        private var trailingActions: [SwipeCellActionItem] {
+            [
+                SwipeCellActionItem(
+                    buttonView: {
+                        AnyView(
+                            Image(systemName: "trash")
+                                .foregroundStyle(.white)
+                                .frame(width: 20, height: 20)
+                        )
+                    },
+                    backgroundColor: .red,
+                    swipeOutAction: true,
+                    swipeOutHapticFeedbackType: .warning,
+                    swipeOutIsDestructive: true,
+                    actionCallback: onDelete
+                )
+            ]
         }
     }
 }
