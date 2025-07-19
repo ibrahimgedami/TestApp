@@ -14,41 +14,47 @@ struct CelebrationView: View {
     @State private var personalCelebrations = ["Day One", "Anniversary"]
     @State private var seasonalCelebrations = ["Eid", "Birthday", "New Year"]
     @State private var otherCelebrations = ["Graduation", "Promotion"]
-    
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    private var isCompact: Bool {
+        horizontalSizeClass == .compact
+    }
     // Swipe state
     @State private var currentUserInteractionCellID: String? = nil
     
-    // UI Constants
-    private let buttonColumns = [GridItem(.adaptive(minimum: 150), spacing: 16)]
-    private let rowHeight: CGFloat = 50
-    private let rowCornerRadius: CGFloat = 12
-    
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // MARK: - Action Buttons
-                    actionButtonsSection
-                    
-                    // MARK: - Celebration Lists
-                    celebrationListSection(title: "Personal", items: $personalCelebrations)
-                    celebrationListSection(title: "Seasonal", items: $seasonalCelebrations)
-                    celebrationListSection(title: "Other", items: $otherCelebrations)
-                }
-                .padding(.bottom)
+        ScrollView {
+            VStack(spacing: 24) {
+                // MARK: - Action Buttons
+                actionButtonsSection
+                
+                // MARK: - Celebration Lists
+                celebrationListSection(title: "Personal", items: $personalCelebrations)
+                celebrationListSection(title: "Seasonal", items: $seasonalCelebrations)
+                celebrationListSection(title: "Other", items: $otherCelebrations)
             }
-            .navigationTitle("Celebrations")
-            .background(Color(.systemGroupedBackground))
+            .padding(.bottom)
         }
+        .navigationTitle("Celebrations")
+        .background(Color(.systemGroupedBackground))
     }
     
     // MARK: - Subviews
     
     private var actionButtonsSection: some View {
-        LazyVGrid(columns: buttonColumns, spacing: 16) {
-            celebrationButton(title: "Add Personal", action: { addItem(to: &personalCelebrations) })
-            celebrationButton(title: "Add Seasonal", action: { addItem(to: &seasonalCelebrations) })
-            celebrationButton(title: "Add Other", action: { addItem(to: &otherCelebrations) })
+        Group {
+            if isCompact {
+                VStack {
+                    celebrationButton(title: "Add Personal", action: { addItem(to: &personalCelebrations) })
+                    celebrationButton(title: "Add Seasonal", action: { addItem(to: &seasonalCelebrations) })
+                    celebrationButton(title: "Add Other", action: { addItem(to: &otherCelebrations) })
+                }
+            } else {
+                HStack {
+                    celebrationButton(title: "Add Personal", action: { addItem(to: &personalCelebrations) })
+                    celebrationButton(title: "Add Seasonal", action: { addItem(to: &seasonalCelebrations) })
+                    celebrationButton(title: "Add Other", action: { addItem(to: &otherCelebrations) })
+                }
+            }
         }
         .padding(.horizontal)
         .padding(.top)
@@ -200,6 +206,7 @@ struct CelebrationView: View {
             ]
         }
     }
+
 }
 
 #Preview {
