@@ -15,11 +15,13 @@
 		05167DF22DE30201003ED899 /* ResizableHeaderScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05167DF02DE30201003ED899 /* ResizableHeaderScrollView.swift */; };
 		05167DF42DE30233003ED899 /* StickyHeaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05167DF32DE30233003ED899 /* StickyHeaderContainer.swift */; };
 		05227B582DDF162C007DB8FB /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05227B572DDF1628007DB8FB /* Product.swift */; };
+		0541F8612E2F6D28004C5E12 /* SwipeCellSUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0541F8602E2F6D28004C5E12 /* SwipeCellSUI */; };
 		0547E89B2DF96D1900A38877 /* SSSwiftUISpinnerButton in Frameworks */ = {isa = PBXBuildFile; productRef = 0547E89A2DF96D1900A38877 /* SSSwiftUISpinnerButton */; };
 		0553E1B62E2A2E970061FAB7 /* CelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0553E1B52E2A2E970061FAB7 /* CelebrationView.swift */; };
 		05A49EC02E0436C200D06E72 /* Eureka in Frameworks */ = {isa = PBXBuildFile; productRef = 05A49EBF2E0436C200D06E72 /* Eureka */; };
 		05A9CE662DED6CB900880782 /* InteractionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A9CE652DED6CB900880782 /* InteractionView.swift */; };
 		05A9CE682DED6D6300880782 /* Interactions.json in Resources */ = {isa = PBXBuildFile; fileRef = 05A9CE672DED6D6300880782 /* Interactions.json */; };
+		05ADEC512E333B6800614107 /* JobCardInvoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ADEC502E333B6800614107 /* JobCardInvoice.swift */; };
 		05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B177192DD8C4D000697606 /* CurveSegement.swift */; };
 		05B63AE32E2B4A1A006B186E /* SwipeCellSUI in Frameworks */ = {isa = PBXBuildFile; productRef = 05B63AE22E2B4A1A006B186E /* SwipeCellSUI */; };
 		05B63AE52E2B4A35006B186E /* SwipeableRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B63AE42E2B4A35006B186E /* SwipeableRow.swift */; };
@@ -52,6 +54,7 @@
 		0553E1B52E2A2E970061FAB7 /* CelebrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationView.swift; sourceTree = "<group>"; };
 		05A9CE652DED6CB900880782 /* InteractionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionView.swift; sourceTree = "<group>"; };
 		05A9CE672DED6D6300880782 /* Interactions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Interactions.json; sourceTree = "<group>"; };
+		05ADEC502E333B6800614107 /* JobCardInvoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobCardInvoice.swift; sourceTree = "<group>"; };
 		05B177192DD8C4D000697606 /* CurveSegement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveSegement.swift; sourceTree = "<group>"; };
 		05B63AE42E2B4A35006B186E /* SwipeableRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeableRow.swift; sourceTree = "<group>"; };
 		05CE8F492DDC995400E88223 /* SearchableModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchableModifier.swift; sourceTree = "<group>"; };
@@ -75,6 +78,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				05E47F062DF9E26E00889EC0 /* Kingfisher in Frameworks */,
+				0541F8612E2F6D28004C5E12 /* SwipeCellSUI in Frameworks */,
 				05B63AE32E2B4A1A006B186E /* SwipeCellSUI in Frameworks */,
 				DD0E3E792D002F5B005ECD21 /* AppBase in Frameworks */,
 				DDDF71972D1807A10063EF5A /* CombineNetwork in Frameworks */,
@@ -125,6 +129,14 @@
 			path = CRM;
 			sourceTree = "<group>";
 		};
+		05ADEC4F2E333B5800614107 /* JobCard */ = {
+			isa = PBXGroup;
+			children = (
+				05ADEC502E333B6800614107 /* JobCardInvoice.swift */,
+			);
+			path = JobCard;
+			sourceTree = "<group>";
+		};
 		05D027252D5C902800A82D32 /* SearchableList */ = {
 			isa = PBXGroup;
 			children = (
@@ -168,6 +180,7 @@
 		DDB902F62BF36CCD00A2FF5A /* TestApp */ = {
 			isa = PBXGroup;
 			children = (
+				05ADEC4F2E333B5800614107 /* JobCard */,
 				0553E1B42E2A2E7A0061FAB7 /* Celebration */,
 				05E47F022DF9CD5C00889EC0 /* Watch product video for Easycase.mp4 */,
 				05E966962DF43BB300401018 /* CacheImage */,
@@ -222,6 +235,7 @@
 				05E47F052DF9E26E00889EC0 /* Kingfisher */,
 				05A49EBF2E0436C200D06E72 /* Eureka */,
 				05B63AE22E2B4A1A006B186E /* SwipeCellSUI */,
+				0541F8602E2F6D28004C5E12 /* SwipeCellSUI */,
 			);
 			productName = TestApp;
 			productReference = DDB902F42BF36CCD00A2FF5A /* TestApp.app */;
@@ -257,7 +271,7 @@
 				0547E8992DF96D1900A38877 /* XCRemoteSwiftPackageReference "SSSwiftUISpinnerButton" */,
 				05E47F042DF9E26E00889EC0 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				05A49EBE2E0436C200D06E72 /* XCRemoteSwiftPackageReference "Eureka" */,
-				05B63AE12E2B4A1A006B186E /* XCLocalSwiftPackageReference "../../Downloads/SwipeCellSUI-main" */,
+				0541F85F2E2F6D28004C5E12 /* XCLocalSwiftPackageReference "../../Downloads/SwipeCellSUI-main" */,
 			);
 			productRefGroup = DDB902F52BF36CCD00A2FF5A /* Products */;
 			projectDirPath = "";
@@ -302,6 +316,7 @@
 				05B1771A2DD8C4D000697606 /* CurveSegement.swift in Sources */,
 				050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */,
 				050943CC2D4742360046A401 /* FilterViewController.swift in Sources */,
+				05ADEC512E333B6800614107 /* JobCardInvoice.swift in Sources */,
 				05A9CE662DED6CB900880782 /* InteractionView.swift in Sources */,
 				05D027272D5C904D00A82D32 /* SelectionView.swift in Sources */,
 				0507069A2DE88D4D00DDB61C /* CustomerProfile.swift in Sources */,
@@ -456,7 +471,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ibrahim.gedami.TestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = ibrahimMoGedmi.TestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -495,7 +510,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ibrahim.gedami.TestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = ibrahimMoGedmi.TestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -529,7 +544,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		05B63AE12E2B4A1A006B186E /* XCLocalSwiftPackageReference "../../Downloads/SwipeCellSUI-main" */ = {
+		0541F85F2E2F6D28004C5E12 /* XCLocalSwiftPackageReference "../../Downloads/SwipeCellSUI-main" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "../../Downloads/SwipeCellSUI-main";
 		};
@@ -579,6 +594,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0541F8602E2F6D28004C5E12 /* SwipeCellSUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwipeCellSUI;
+		};
 		0547E89A2DF96D1900A38877 /* SSSwiftUISpinnerButton */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0547E8992DF96D1900A38877 /* XCRemoteSwiftPackageReference "SSSwiftUISpinnerButton" */;

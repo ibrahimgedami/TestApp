@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import AppBase
-import CombineNetwork
 
 @main
 struct TestAppApp: App {
