@@ -7,209 +7,516 @@
 
 import SwiftUI
 
-struct Product: Identifiable {
+struct Product: Identifiable, Hashable {
     let id = UUID()
     let referenceNumber: String
     let classification: String
     let discount: Double
     let unitPrice: Double
+    var imageURL: String?
     
     // Details that load when selected
     var name: String?
+    var description: String?
     var stock: Int?
     var onTransit: Int?
     var reservation: Int?
     var balance: Int?
+    var lastUpdated: Date?
 }
 
 class ProductViewModel: ObservableObject {
-    @Published var brands: [String] = ["Brand A", "Brand B", "Brand C", "Brand D"]
-    @Published var groups: [String] = ["Group 1", "Group 2", "Group 3"]
-    @Published var subgroups: [String] = ["Subgroup A", "Subgroup B", "Subgroup C"]
+    // Sample data - replace with your actual data source
+    @Published var brands: [String] = ["All Brands", "Nike", "Adidas", "Puma", "Under Armour"]
+    @Published var groups: [String] = ["All Groups", "Footwear", "Apparel", "Accessories"]
+    @Published var subgroups: [String: [String]] = [
+        "Footwear": ["All Subgroups", "Running", "Basketball", "Soccer"],
+        "Apparel": ["All Subgroups", "T-Shirts", "Shorts", "Jackets"],
+        "Accessories": ["All Subgroups", "Bags", "Hats", "Socks"]
+    ]
     
-    @Published var selectedBrand: String = ""
-    @Published var selectedGroup: String = ""
-    @Published var selectedSubgroup: String = ""
+    @Published var selectedBrand: String = "All Brands"
+    @Published var selectedGroup: String = "All Groups"
+    @Published var selectedSubgroup: String = "All Subgroups"
     @Published var referenceText: String = ""
     
     @Published var searchResults: [Product] = []
     @Published var selectedProduct: Product?
+    @Published var isLoading = false
+    @Published var showError = false
+    @Published var errorMessage = ""
+    
+    // Search history
+    @Published var searchHistory: [String] = []
+    @Published var showHistory = false
+    
+    // Sorting options
+    enum SortOption: String, CaseIterable {
+        case reference = "Reference"
+        case priceLowHigh = "Price (Low to High)"
+        case priceHighLow = "Price (High to Low)"
+        case discount = "Discount"
+    }
+    @Published var selectedSortOption: SortOption = .reference
     
     init() {
-        // Initialize with first item selected or leave empty
+        loadSampleData()
+    }
+    
+    private func loadSampleData() {
+        // Load some initial data for the pickers
         selectedBrand = brands.first ?? ""
         selectedGroup = groups.first ?? ""
-        selectedSubgroup = subgroups.first ?? ""
+        selectedSubgroup = subgroups[selectedGroup]?.first ?? ""
     }
     
     func search() {
-        // Simulate search - replace with your actual data fetching logic
-        searchResults = [
-            Product(referenceNumber: "REF123", classification: "Class A", discount: 5.0, unitPrice: 99.99),
-            Product(referenceNumber: "REF456", classification: "Class B", discount: 10.0, unitPrice: 149.99),
-            Product(referenceNumber: "REF789", classification: "Class C", discount: 15.0, unitPrice: 199.99)
-        ]
+        guard !isLoading else { return }
+        
+        isLoading = true
+        showError = false
+        
+        // Add to search history if not empty
+        if !referenceText.isEmpty && !searchHistory.contains(referenceText) {
+            searchHistory.insert(referenceText, at: 0)
+            if searchHistory.count > 5 {
+                searchHistory.removeLast()
+            }
+        }
+        
+        // Simulate network delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.isLoading = false
+            
+            // Simulate search results - replace with your actual data fetching
+            self.searchResults = [
+                Product(referenceNumber: "REF123", classification: "Running Shoes", discount: 15.0, unitPrice: 129.99, imageURL: "https://example.com/shoe1.jpg"),
+                Product(referenceNumber: "REF456", classification: "Basketball Shorts", discount: 10.0, unitPrice: 49.99, imageURL: "https://example.com/shorts1.jpg"),
+                Product(referenceNumber: "REF789", classification: "Training Jacket", discount: 20.0, unitPrice: 89.99, imageURL: "https://example.com/jacket1.jpg"),
+                Product(referenceNumber: "REF101", classification: "Running Socks", discount: 5.0, unitPrice: 14.99, imageURL: "https://example.com/socks1.jpg"),
+                Product(referenceNumber: "REF202", classification: "Gym Bag", discount: 25.0, unitPrice: 59.99, imageURL: "https://example.com/bag1.jpg")
+            ].sorted(by: self.currentSortPredicate())
+            
+            // Select first item automatically if none selected
+            if self.selectedProduct == nil, let first = self.searchResults.first {
+                self.loadDetails(for: first)
+            }
+        }
     }
     
     func loadDetails(for product: Product) {
-        // Simulate loading details - replace with your actual data fetching
-        var detailedProduct = product
-        detailedProduct.name = "Detailed Product Name"
-        detailedProduct.stock = 100
-        detailedProduct.onTransit = 20
-        detailedProduct.reservation = 15
-        detailedProduct.balance = 65
+        isLoading = true
         
-        selectedProduct = detailedProduct
+        // Simulate network delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.isLoading = false
+            
+            // Simulate detailed product info - replace with your actual data
+            var detailedProduct = product
+            detailedProduct.name = "Premium \(product.classification)"
+            detailedProduct.description = "High-quality \(product.classification.lowercased()) with advanced features for maximum performance."
+            detailedProduct.stock = Int.random(in: 50...200)
+            detailedProduct.onTransit = Int.random(in: 5...20)
+            detailedProduct.reservation = Int.random(in: 2...15)
+            detailedProduct.balance = (detailedProduct.stock ?? 0) - (detailedProduct.reservation ?? 0)
+            detailedProduct.lastUpdated = Date()
+            
+            self.selectedProduct = detailedProduct
+        }
+    }
+    
+    func sortResults() {
+        searchResults.sort(by: currentSortPredicate())
+    }
+    
+    private func currentSortPredicate() -> (Product, Product) -> Bool {
+        switch selectedSortOption {
+        case .reference:
+            return { $0.referenceNumber < $1.referenceNumber }
+        case .priceLowHigh:
+            return { $0.unitPrice < $1.unitPrice }
+        case .priceHighLow:
+            return { $0.unitPrice > $1.unitPrice }
+        case .discount:
+            return { $0.discount > $1.discount }
+        }
     }
 }
 
 struct ProductSearchView: View {
-    
     @StateObject private var viewModel = ProductViewModel()
+    @State private var showFilters = false
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Search Criteria Section
-                VStack(alignment: .leading, spacing: 15) {
-                    Text("Search Criteria")
-                        .font(.headline)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Search Criteria Section
+                    searchCriteriaSection
                     
-                    Picker("Brand", selection: $viewModel.selectedBrand) {
-                        ForEach(viewModel.brands, id: \.self) { brand in
-                            Text(brand).tag(brand)
-                        }
+                    // Search Results Section
+                    if !viewModel.searchResults.isEmpty {
+                        searchResultsSection
                     }
-                    .pickerStyle(MenuPickerStyle())
                     
-                    Picker("Group", selection: $viewModel.selectedGroup) {
-                        ForEach(viewModel.groups, id: \.self) { group in
-                            Text(group).tag(group)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                    
-                    Picker("Subgroup", selection: $viewModel.selectedSubgroup) {
-                        ForEach(viewModel.subgroups, id: \.self) { subgroup in
-                            Text(subgroup).tag(subgroup)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                    
-                    TextField("Reference Number", text: $viewModel.referenceText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
-                    Button(action: {
-                        viewModel.search()
-                    }) {
-                        Text("Search")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
+                    // Product Details Section
+                    if let selectedProduct = viewModel.selectedProduct {
+                        productDetailsSection(selectedProduct)
                     }
                 }
                 .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-                
-                // Search Results Section
-                if !viewModel.searchResults.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Search Results")
-                            .font(.headline)
-                        
-                        List(viewModel.searchResults) { product in
-                            ProductRow(product: product)
-                                .onTapGesture {
-                                    viewModel.loadDetails(for: product)
-                                }
-                                .listRowBackground(viewModel.selectedProduct?.id == product.id ? Color.blue.opacity(0.1) : Color.clear)
-                        }
-                        .listStyle(PlainListStyle())
-                        .frame(height: 200)
-                    }
-                }
-                
-                // Product Details Section
-                if let selectedProduct = viewModel.selectedProduct {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Product Details")
-                            .font(.headline)
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            if let name = selectedProduct.name {
-                                DetailRow(title: "Name:", value: name)
-                            }
-                            DetailRow(title: "Reference:", value: selectedProduct.referenceNumber)
-                            DetailRow(title: "Classification:", value: selectedProduct.classification)
-                            DetailRow(title: "Discount:", value: "\(selectedProduct.discount)%")
-                            DetailRow(title: "Unit Price:", value: String(format: "$%.2f", selectedProduct.unitPrice))
-                            
-                            Divider()
-                            
-                            if let stock = selectedProduct.stock {
-                                DetailRow(title: "Stock:", value: "\(stock)")
-                            }
-                            if let onTransit = selectedProduct.onTransit {
-                                DetailRow(title: "On Transit:", value: "\(onTransit)")
-                            }
-                            if let reservation = selectedProduct.reservation {
-                                DetailRow(title: "Reservation:", value: "\(reservation)")
-                            }
-                            if let balance = selectedProduct.balance {
-                                DetailRow(title: "Balance:", value: "\(balance)")
-                            }
-                        }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                    }
-                }
-                
-                Spacer()
             }
-            .padding()
             .navigationTitle("Product Search")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showFilters.toggle() }) {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                            .symbolRenderingMode(.multicolor)
+                    }
+                }
+            }
+            .sheet(isPresented: $showFilters) {
+                filtersSheet
+            }
+            .overlay {
+                if viewModel.isLoading {
+                    ProgressView("Loading...")
+                        .padding()
+                        .background(Color(.systemBackground).opacity(0.8))
+                        .cornerRadius(10)
+                }
+            }
+            .alert("Error", isPresented: $viewModel.showError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(viewModel.errorMessage)
+            }
         }
     }
     
+    // MARK: - Subviews
+    
+    private var searchCriteriaSection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            Text("Search Criteria")
+                .font(.headline)
+                .padding(.bottom, 5)
+            
+            // Brand Picker
+            Picker("Brand", selection: $viewModel.selectedBrand) {
+                ForEach(viewModel.brands, id: \.self) { brand in
+                    Text(brand).tag(brand)
+                }
+            }
+            .pickerStyle(.menu)
+            
+            // Group Picker
+            Picker("Group", selection: $viewModel.selectedGroup) {
+                ForEach(viewModel.groups, id: \.self) { group in
+                    Text(group).tag(group)
+                }
+            }
+            .pickerStyle(.menu)
+            .onChange(of: viewModel.selectedGroup) { _ in
+                viewModel.selectedSubgroup = viewModel.subgroups[viewModel.selectedGroup]?.first ?? ""
+            }
+            
+            // Subgroup Picker (only shown when a group is selected)
+            if viewModel.selectedGroup != "All Groups" {
+                Picker("Subgroup", selection: $viewModel.selectedSubgroup) {
+                    ForEach(viewModel.subgroups[viewModel.selectedGroup] ?? [], id: \.self) { subgroup in
+                        Text(subgroup).tag(subgroup)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+            
+            // Reference Search with History
+            VStack(alignment: .leading) {
+                HStack {
+                    TextField("Reference Number", text: $viewModel.referenceText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .overlay(alignment: .trailing) {
+                            if !viewModel.referenceText.isEmpty {
+                                Button(action: {
+                                    viewModel.referenceText = ""
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.trailing, 8)
+                            }
+                        }
+                    
+                    if !viewModel.searchHistory.isEmpty {
+                        Button(action: {
+                            viewModel.showHistory.toggle()
+                        }) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+                
+                if viewModel.showHistory && !viewModel.searchHistory.isEmpty {
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.searchHistory, id: \.self) { historyItem in
+                            Text(historyItem)
+                                .padding(8)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(5)
+                                .onTapGesture {
+                                    viewModel.referenceText = historyItem
+                                    viewModel.showHistory = false
+                                }
+                        }
+                    }
+                    .transition(.opacity)
+                }
+            }
+            
+            // Search Button
+            Button(action: {
+                viewModel.search()
+            }) {
+                Label("Search", systemImage: "magnifyingglass")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+    
+    private var searchResultsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Search Results (\(viewModel.searchResults.count))")
+                    .font(.headline)
+                
+                Spacer()
+                
+                Menu {
+                    ForEach(ProductViewModel.SortOption.allCases, id: \.self) { option in
+                        Button(action: {
+                            viewModel.selectedSortOption = option
+                            viewModel.sortResults()
+                        }) {
+                            Label(option.rawValue, systemImage: viewModel.selectedSortOption == option ? "checkmark" : "")
+                        }
+                    }
+                } label: {
+                    Label("Sort", systemImage: "arrow.up.arrow.down")
+                        .font(.subheadline)
+                }
+            }
+            
+            LazyVStack(spacing: 0) {
+                ForEach(viewModel.searchResults) { product in
+                    ProductRow(product: product, isSelected: viewModel.selectedProduct?.id == product.id)
+                        .onTapGesture {
+                            viewModel.loadDetails(for: product)
+                        }
+                        .animation(.default, value: viewModel.selectedProduct)
+                }
+            }
+            .background(Color(.systemBackground))
+            .cornerRadius(10)
+            .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+        }
+    }
+    
+    private func productDetailsSection(_ product: Product) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Product Details")
+                .font(.headline)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                // Product Image and Basic Info
+                HStack(alignment: .top, spacing: 15) {
+                    // Image placeholder - replace with AsyncImage in real app
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 80, height: 80)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                        )
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let name = product.name {
+                            Text(name)
+                                .font(.headline)
+                        }
+                        
+                        Text(product.referenceNumber)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        HStack(spacing: 16) {
+                            VStack(alignment: .leading) {
+                                Text("Price")
+                                    .font(.caption)
+                                Text(String(format: "$%.2f", product.unitPrice))
+                                    .font(.subheadline.bold())
+                            }
+                            
+                            VStack(alignment: .leading) {
+                                Text("Discount")
+                                    .font(.caption)
+                                Text("\(product.discount)%")
+                                    .font(.subheadline.bold())
+                                    .foregroundColor(.green)
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
+                    
+                    Spacer()
+                }
+                
+                Divider()
+                
+                // Description
+                if let description = product.description {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Description")
+                            .font(.subheadline.bold())
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Divider()
+                
+                // Stock Information
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Inventory")
+                        .font(.subheadline.bold())
+                    
+                    Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 8) {
+                        GridRow {
+                            Text("Stock:")
+                            Text("\(product.stock ?? 0)")
+                                .gridColumnAlignment(.trailing)
+                            
+                            Text("On Transit:")
+                            Text("\(product.onTransit ?? 0)")
+                                .gridColumnAlignment(.trailing)
+                        }
+                        
+                        GridRow {
+                            Text("Reserved:")
+                            Text("\(product.reservation ?? 0)")
+                                .gridColumnAlignment(.trailing)
+                            
+                            Text("Available:")
+                            Text("\(product.balance ?? 0)")
+                                .gridColumnAlignment(.trailing)
+                                .foregroundColor((product.balance ?? 0) <= 0 ? .red : .primary)
+                        }
+                    }
+                    .font(.subheadline)
+                }
+                
+                // Last updated
+                if let lastUpdated = product.lastUpdated {
+                    Divider()
+                    
+                    HStack {
+                        Text("Last updated:")
+                            .font(.caption)
+                        Text(lastUpdated.formatted(date: .abbreviated, time: .shortened))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+        }
+    }
+    
+    private var filtersSheet: some View {
+        NavigationView {
+            Form {
+                Section("Current Filters") {
+                    Text("Brand: \(viewModel.selectedBrand)")
+                    Text("Group: \(viewModel.selectedGroup)")
+                    if viewModel.selectedGroup != "All Groups" {
+                        Text("Subgroup: \(viewModel.selectedSubgroup)")
+                    }
+                    Text("Reference: \(viewModel.referenceText.isEmpty ? "None" : viewModel.referenceText)")
+                }
+                
+                Section("Reset Filters") {
+                    Button("Reset All Filters", role: .destructive) {
+                        viewModel.selectedBrand = "All Brands"
+                        viewModel.selectedGroup = "All Groups"
+                        viewModel.selectedSubgroup = "All Subgroups"
+                        viewModel.referenceText = ""
+                        showFilters = false
+                    }
+                }
+            }
+            .navigationTitle("Filters")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        showFilters = false
+                    }
+                }
+            }
+        }
+    }
 }
 
 struct ProductRow: View {
     let product: Product
+    let isSelected: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(product.referenceNumber)
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(product.classification)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(product.referenceNumber)
+                        .font(.headline)
+                    
+                    Text(product.classification)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
                 Spacer()
-                Text("\(product.discount)%")
-                Spacer()
-                Text(String(format: "$%.2f", product.unitPrice))
+                
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(String(format: "$%.2f", product.unitPrice))
+                        .font(.subheadline.bold())
+                    
+                    Text("\(product.discount)% off")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
             }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 8)
-    }
-}
-
-struct DetailRow: View {
-    let title: String
-    let value: String
-    
-    var body: some View {
-        HStack {
-            Text(title)
-                .fontWeight(.semibold)
-            Spacer()
-            Text(value)
-        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isSelected ? Color.blue : Color.gray.opacity(0.2), lineWidth: 1)
+        )
+        .padding(.horizontal, 1)
     }
 }
 
