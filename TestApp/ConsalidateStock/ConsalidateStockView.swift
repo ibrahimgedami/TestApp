@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct Product: Identifiable, Hashable {
+    
     let id = UUID()
     let referenceNumber: String
     let classification: String
@@ -23,6 +24,7 @@ struct Product: Identifiable, Hashable {
     var reservation: Int?
     var balance: Int?
     var lastUpdated: Date?
+    
 }
 
 class ProductViewModel: ObservableObject {
@@ -48,7 +50,6 @@ class ProductViewModel: ObservableObject {
     
     // Search history
     @Published var searchHistory: [String] = []
-    @Published var showHistory = false
     
     // Sorting options
     enum SortOption: String, CaseIterable {
@@ -64,7 +65,6 @@ class ProductViewModel: ObservableObject {
     }
     
     private func loadSampleData() {
-        // Load some initial data for the pickers
         selectedBrand = brands.first ?? ""
         selectedGroup = groups.first ?? ""
         selectedSubgroup = subgroups[selectedGroup]?.first ?? ""
@@ -88,14 +88,35 @@ class ProductViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.isLoading = false
             
-            // Simulate search results - replace with your actual data fetching
-            self.searchResults = [
+            // Filter logic based on selections
+            let allProducts = [
                 Product(referenceNumber: "REF123", classification: "Running Shoes", discount: 15.0, unitPrice: 129.99, imageURL: "https://example.com/shoe1.jpg"),
                 Product(referenceNumber: "REF456", classification: "Basketball Shorts", discount: 10.0, unitPrice: 49.99, imageURL: "https://example.com/shorts1.jpg"),
                 Product(referenceNumber: "REF789", classification: "Training Jacket", discount: 20.0, unitPrice: 89.99, imageURL: "https://example.com/jacket1.jpg"),
                 Product(referenceNumber: "REF101", classification: "Running Socks", discount: 5.0, unitPrice: 14.99, imageURL: "https://example.com/socks1.jpg"),
                 Product(referenceNumber: "REF202", classification: "Gym Bag", discount: 25.0, unitPrice: 59.99, imageURL: "https://example.com/bag1.jpg")
-            ].sorted(by: self.currentSortPredicate())
+            ]
+            
+            // Apply filters
+            var filteredProducts = allProducts
+            
+            if self.selectedBrand != "All Brands" {
+                filteredProducts = filteredProducts.filter { $0.classification.contains(self.selectedBrand) }
+            }
+            
+            if self.selectedGroup != "All Groups" {
+                filteredProducts = filteredProducts.filter { $0.classification.contains(self.selectedGroup) }
+            }
+            
+            if self.selectedSubgroup != "All Subgroups" && self.selectedGroup != "All Groups" {
+                filteredProducts = filteredProducts.filter { $0.classification.contains(self.selectedSubgroup) }
+            }
+            
+            if !self.referenceText.isEmpty {
+                filteredProducts = filteredProducts.filter { $0.referenceNumber.localizedCaseInsensitiveContains(self.referenceText) }
+            }
+            
+            self.searchResults = filteredProducts.sorted(by: self.currentSortPredicate())
             
             // Select first item automatically if none selected
             if self.selectedProduct == nil, let first = self.searchResults.first {
@@ -107,11 +128,9 @@ class ProductViewModel: ObservableObject {
     func loadDetails(for product: Product) {
         isLoading = true
         
-        // Simulate network delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.isLoading = false
             
-            // Simulate detailed product info - replace with your actual data
             var detailedProduct = product
             detailedProduct.name = "Premium \(product.classification)"
             detailedProduct.description = "High-quality \(product.classification.lowercased()) with advanced features for maximum performance."
@@ -141,6 +160,13 @@ class ProductViewModel: ObservableObject {
             return { $0.discount > $1.discount }
         }
     }
+    
+    func resetFilters() {
+        selectedBrand = "All Brands"
+        selectedGroup = "All Groups"
+        selectedSubgroup = "All Subgroups"
+        referenceText = ""
+    }
 }
 
 struct ProductSearchView: View {
@@ -151,12 +177,14 @@ struct ProductSearchView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Search Criteria Section
-                    searchCriteriaSection
+                    // Quick Search Bar
+                    quickSearchBar
                     
                     // Search Results Section
                     if !viewModel.searchResults.isEmpty {
                         searchResultsSection
+                    } else {
+                        emptyStateView
                     }
                     
                     // Product Details Section
@@ -176,7 +204,10 @@ struct ProductSearchView: View {
                 }
             }
             .sheet(isPresented: $showFilters) {
-                filtersSheet
+                FilterView(viewModel: viewModel, onSearch: {
+                    showFilters = false
+                    viewModel.search()
+                })
             }
             .overlay {
                 if viewModel.isLoading {
@@ -191,107 +222,34 @@ struct ProductSearchView: View {
             } message: {
                 Text(viewModel.errorMessage)
             }
+            .onAppear {
+                // Perform initial search
+                viewModel.search()
+            }
         }
     }
     
     // MARK: - Subviews
     
-    private var searchCriteriaSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Search Criteria")
-                .font(.headline)
-                .padding(.bottom, 5)
-            
-            // Brand Picker
-            Picker("Brand", selection: $viewModel.selectedBrand) {
-                ForEach(viewModel.brands, id: \.self) { brand in
-                    Text(brand).tag(brand)
+    private var quickSearchBar: some View {
+        HStack {
+            TextField("Quick search...", text: $viewModel.referenceText)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .submitLabel(.search)
+                .onSubmit {
+                    viewModel.search()
                 }
-            }
-            .pickerStyle(.menu)
             
-            // Group Picker
-            Picker("Group", selection: $viewModel.selectedGroup) {
-                ForEach(viewModel.groups, id: \.self) { group in
-                    Text(group).tag(group)
-                }
-            }
-            .pickerStyle(.menu)
-            .onChange(of: viewModel.selectedGroup) { _ in
-                viewModel.selectedSubgroup = viewModel.subgroups[viewModel.selectedGroup]?.first ?? ""
-            }
-            
-            // Subgroup Picker (only shown when a group is selected)
-            if viewModel.selectedGroup != "All Groups" {
-                Picker("Subgroup", selection: $viewModel.selectedSubgroup) {
-                    ForEach(viewModel.subgroups[viewModel.selectedGroup] ?? [], id: \.self) { subgroup in
-                        Text(subgroup).tag(subgroup)
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-            
-            // Reference Search with History
-            VStack(alignment: .leading) {
-                HStack {
-                    TextField("Reference Number", text: $viewModel.referenceText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .overlay(alignment: .trailing) {
-                            if !viewModel.referenceText.isEmpty {
-                                Button(action: {
-                                    viewModel.referenceText = ""
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.gray)
-                                }
-                                .padding(.trailing, 8)
-                            }
-                        }
-                    
-                    if !viewModel.searchHistory.isEmpty {
-                        Button(action: {
-                            viewModel.showHistory.toggle()
-                        }) {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                }
-                
-                if viewModel.showHistory && !viewModel.searchHistory.isEmpty {
-                    VStack(alignment: .leading) {
-                        ForEach(viewModel.searchHistory, id: \.self) { historyItem in
-                            Text(historyItem)
-                                .padding(8)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(5)
-                                .onTapGesture {
-                                    viewModel.referenceText = historyItem
-                                    viewModel.showHistory = false
-                                }
-                        }
-                    }
-                    .transition(.opacity)
-                }
-            }
-            
-            // Search Button
             Button(action: {
                 viewModel.search()
             }) {
-                Label("Search", systemImage: "magnifyingglass")
-                    .frame(maxWidth: .infinity)
-                    .padding()
+                Image(systemName: "magnifyingglass")
+                    .padding(8)
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(8)
             }
-            .buttonStyle(.plain)
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
     }
     
     private var searchResultsSection: some View {
@@ -332,6 +290,21 @@ struct ProductSearchView: View {
         }
     }
     
+    private var emptyStateView: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40))
+                .foregroundColor(.gray)
+            Text("No products found")
+                .font(.headline)
+            Text("Try adjusting your search criteria")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+        }
+        .padding(40)
+        .frame(maxWidth: .infinity)
+    }
+    
     private func productDetailsSection(_ product: Product) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Product Details")
@@ -340,7 +313,6 @@ struct ProductSearchView: View {
             VStack(alignment: .leading, spacing: 12) {
                 // Product Image and Basic Info
                 HStack(alignment: .top, spacing: 15) {
-                    // Image placeholder - replace with AsyncImage in real app
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.2))
                         .frame(width: 80, height: 80)
@@ -444,36 +416,100 @@ struct ProductSearchView: View {
             .cornerRadius(12)
         }
     }
+}
+
+struct FilterView: View {
     
-    private var filtersSheet: some View {
+    @ObservedObject var viewModel: ProductViewModel
+    var onSearch: () -> Void
+    
+    var body: some View {
         NavigationView {
             Form {
-                Section("Current Filters") {
-                    Text("Brand: \(viewModel.selectedBrand)")
-                    Text("Group: \(viewModel.selectedGroup)")
-                    if viewModel.selectedGroup != "All Groups" {
-                        Text("Subgroup: \(viewModel.selectedSubgroup)")
+                Section("Brand") {
+                    Picker("Select Brand", selection: $viewModel.selectedBrand) {
+                        ForEach(viewModel.brands, id: \.self) { brand in
+                            Text(brand).tag(brand)
+                        }
                     }
-                    Text("Reference: \(viewModel.referenceText.isEmpty ? "None" : viewModel.referenceText)")
+                    .pickerStyle(.menu)
                 }
                 
-                Section("Reset Filters") {
-                    Button("Reset All Filters", role: .destructive) {
-                        viewModel.selectedBrand = "All Brands"
-                        viewModel.selectedGroup = "All Groups"
-                        viewModel.selectedSubgroup = "All Subgroups"
-                        viewModel.referenceText = ""
-                        showFilters = false
+                Section("Group") {
+                    Picker("Select Group", selection: $viewModel.selectedGroup) {
+                        ForEach(viewModel.groups, id: \.self) { group in
+                            Text(group).tag(group)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: viewModel.selectedGroup) { _, _ in
+                        viewModel.selectedSubgroup = viewModel.subgroups[viewModel.selectedGroup]?.first ?? ""
+                    }
+                }
+                
+                if viewModel.selectedGroup != "All Groups" {
+                    Section("Subgroup") {
+                        Picker("Select Subgroup", selection: $viewModel.selectedSubgroup) {
+                            ForEach(viewModel.subgroups[viewModel.selectedGroup] ?? [], id: \.self) { subgroup in
+                                Text(subgroup).tag(subgroup)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                    }
+                }
+                
+                Section("Reference Number") {
+                    TextField("Enter reference", text: $viewModel.referenceText)
+                    
+                    if !viewModel.searchHistory.isEmpty {
+                        VStack(alignment: .leading) {
+                            Text("Recent Searches")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(viewModel.searchHistory, id: \.self) { history in
+                                        Button(action: {
+                                            viewModel.referenceText = history
+                                        }) {
+                                            Text(history)
+                                                .font(.caption)
+                                                .padding(6)
+                                                .background(Color.gray.opacity(0.1))
+                                                .cornerRadius(5)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                Section {
+                    Button(action: {
+                        viewModel.resetFilters()
+                    }) {
+                        Text("Reset All Filters")
+                            .foregroundColor(.red)
+                            .frame(maxWidth: .infinity)
                     }
                 }
             }
             .navigationTitle("Filters")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        showFilters = false
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        onSearch()
                     }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Search") {
+                        onSearch()
+                    }
+                    .bold()
                 }
             }
         }
@@ -481,6 +517,7 @@ struct ProductSearchView: View {
 }
 
 struct ProductRow: View {
+    
     let product: Product
     let isSelected: Bool
     
