@@ -3,4 +3,22 @@
    uuid = "B6ADCBFB-393C-49D8-95E7-23D2E91ED6CF"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "73E72573-858B-4A58-AF4D-872BDA0F79F4"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TestApp/JobCard/JobCardInvoice.swift"
+            startingColumnNumber = "25"
+            endingColumnNumber = "40"
+            startingLineNumber = "55"
+            endingLineNumber = "55"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
