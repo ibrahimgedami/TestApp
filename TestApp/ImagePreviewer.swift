@@ -8,21 +8,23 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-class ImageViewerViewModel: ObservableObject {
+// MARK: - ViewModel
+public class ImageViewerViewModel: ObservableObject {
     
-    let imageUrl: String
-    @Published var imageData: Data?
-    @Published var isLoading = true
-    @Published var error: Error?
+    @Published public var imageData: Data?
+    @Published public var isLoading = true
+    @Published public var error: Error?
     
-    init(imageUrl: String) {
+    private let imageUrl: String
+    
+    public init(imageUrl: String) {
         self.imageUrl = imageUrl
         loadImage()
     }
     
-    func loadImage() {
+    public func loadImage() {
         guard let url = URL(string: imageUrl) else {
-            error = NSError(domain: "Invalid URL", code: 0, userInfo: nil)
+            error = NSError(domain: "Invalid URL", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid image URL"])
             isLoading = false
             return
         }
@@ -40,7 +42,7 @@ class ImageViewerViewModel: ObservableObject {
                 }
                 
                 guard let data = data else {
-                    self?.error = NSError(domain: "No data received", code: 0, userInfo: nil)
+                    self?.error = NSError(domain: "No Data", code: 0, userInfo: [NSLocalizedDescriptionKey: "No image data received"])
                     return
                 }
                 
@@ -49,56 +51,81 @@ class ImageViewerViewModel: ObservableObject {
         }.resume()
     }
     
-    func retry() {
+    public func retry() {
         loadImage()
     }
     
 }
 
 // MARK: - Views
-struct ImageViewer: View {
+public struct ImageViewer: View {
     
-    @StateObject var viewModel: ImageViewerViewModel
+    @StateObject private var viewModel: ImageViewerViewModel
     @State private var isShowingFullScreen = false
     
-    init(imageUrl: String) {
+    private let thumbnailSize: CGSize
+    private let cornerRadius: CGFloat
+    private let shadowRadius: CGFloat
+    
+    public init(
+        imageUrl: String,
+        thumbnailSize: CGSize,
+        cornerRadius: CGFloat = 8,
+        shadowRadius: CGFloat = 4
+    ) {
         _viewModel = StateObject(wrappedValue: ImageViewerViewModel(imageUrl: imageUrl))
+        self.thumbnailSize = thumbnailSize
+        self.cornerRadius = cornerRadius
+        self.shadowRadius = shadowRadius
     }
     
-    var body: some View {
+    public var body: some View {
         Group {
             if viewModel.isLoading {
                 ProgressView()
-                    .frame(width: 100, height: 100)
+                    .frame(width: thumbnailSize.width, height: thumbnailSize.height)
             } else if let error = viewModel.error {
                 ErrorView(error: error, retryAction: viewModel.retry)
+                    .frame(width: thumbnailSize.width, height: thumbnailSize.height)
             } else if let imageData = viewModel.imageData, let uiImage = UIImage(data: imageData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: 200, maxHeight: 200)
-                    .cornerRadius(8)
-                    .shadow(radius: 4)
-                    .onTapGesture {
-                        isShowingFullScreen = true
-                    }
+                thumbnailView(image: uiImage)
                     .sheet(isPresented: $isShowingFullScreen) {
                         FullScreenImageView(image: uiImage)
                     }
             }
         }
     }
+    
+    private func thumbnailView(image: UIImage) -> some View {
+        Image(uiImage: image)
+            .resizable()
+            .scaledToFit()
+            .frame(width: thumbnailSize.width, height: thumbnailSize.height)
+            .cornerRadius(cornerRadius)
+            .shadow(radius: shadowRadius)
+            .onTapGesture {
+                isShowingFullScreen = true
+            }
+            .accessibilityLabel("Image thumbnail")
+            .accessibilityAddTraits(.isButton)
+    }
 }
 
-struct FullScreenImageView: View {
-    let image: UIImage
-    @Environment(\.presentationMode) var presentationMode
+// MARK: - Full Screen View
+public struct FullScreenImageView: View {
+    
+    public let image: UIImage
+    @Environment(\.dismiss) var dismiss
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
     
-    var body: some View {
+    public init(image: UIImage) {
+        self.image = image
+    }
+    
+    public var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             
@@ -151,30 +178,49 @@ struct FullScreenImageView: View {
                             }
                         }
                 )
-            
-            VStack {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.white)
-                            .padding()
+                .accessibilityLabel("Full screen image")
+                .accessibilityZoomAction { action in
+                    if action.direction == .zoomIn {
+                        withAnimation { scale *= 1.5 }
+                    } else {
+                        withAnimation { scale /= 1.5 }
                     }
                 }
+            
+            closeButton
+        }
+    }
+    
+    private var closeButton: some View {
+        VStack {
+            HStack {
                 Spacer()
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .padding()
+                }
+                .accessibilityLabel("Close full screen")
             }
+            Spacer()
         }
     }
 }
 
-struct ErrorView: View {
-    let error: Error
-    let retryAction: () -> Void
+// MARK: - Error View
+public struct ErrorView: View {
+    public let error: Error
+    public let retryAction: () -> Void
     
-    var body: some View {
+    public init(error: Error, retryAction: @escaping () -> Void) {
+        self.error = error
+        self.retryAction = retryAction
+    }
+    
+    public var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 40))
@@ -195,10 +241,9 @@ struct ErrorView: View {
             .padding(.top)
         }
         .padding()
-        .frame(width: 200, height: 200)
     }
 }
 
 #Preview {
-    ImageViewer(imageUrl: "http://172.150.2.73/photo_direct/M126200-0005.JPG")
+    ImageViewer(imageUrl: "http://172.150.2.73/photo_direct/M126200-0005.JPG", thumbnailSize: CGSize(width: 200, height: 200))
 }
