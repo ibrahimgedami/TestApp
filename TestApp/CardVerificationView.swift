@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+import SwiftUI
+
+// Custom color palette
+extension Color {
+    static let darkBlue = Color(red: 0.1, green: 0.2, blue: 0.4)
+    static let vibrantBlue = Color(red: 0.2, green: 0.5, blue: 1.0)
+    static let lightBlue = Color(red: 0.9, green: 0.95, blue: 1.0)
+    static let successGreen = Color(red: 0.2, green: 0.8, blue: 0.4)
+    static let warningYellow = Color(red: 1.0, green: 0.8, blue: 0.2)
+    static let errorRed = Color(red: 1.0, green: 0.3, blue: 0.3)
+}
+
 class CardVerificationViewModel: ObservableObject {
     @Published var lastFourDigits = "" {
         didSet {
@@ -31,6 +43,11 @@ class CardVerificationViewModel: ObservableObject {
     @Published var showValidationErrors = false
     @Published var isLoading = false
     @Published var isSuccess = false
+    @Published var fieldFocus: FieldFocus? = .lastFourDigits
+    
+    enum FieldFocus {
+        case lastFourDigits, cvc
+    }
     
     var allFieldsValid: Bool {
         lastFourDigitsValid && cvcValid
@@ -58,7 +75,7 @@ class CardVerificationViewModel: ObservableObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 self.isLoading = false
                 self.isSuccess = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     completion(true)
                 }
             }
@@ -72,13 +89,21 @@ struct CardVerificationView: View {
     @StateObject private var viewModel = CardVerificationViewModel()
     @Environment(\.presentationMode) var presentationMode
     @State private var shakeInvalidField: Bool = false
+    @State private var pulseButton = false
+    @State private var cardTilt = CGSize.zero
+    @Namespace private var animation
     
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(gradient: Gradient(colors: [Color(#colorLiteral(red: 0.9490196078, green: 0.9568627451, blue: 0.9803921569, alpha: 1)), Color.white]),
-                           startPoint: .top, endPoint: .bottom)
-            .edgesIgnoringSafeArea(.all)
+            // Background with subtle texture
+            Color.lightBlue
+                .edgesIgnoringSafeArea(.all)
+                .overlay(
+                    Image(systemName: "square.stack.3d.up.fill")
+                        .foregroundColor(.white.opacity(0.1))
+                        .font(.system(size: 300))
+                        .offset(x: 100, y: -100)
+                )
             
             VStack(spacing: 0) {
                 // Header
@@ -87,16 +112,22 @@ struct CardVerificationView: View {
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.darkBlue)
                             .frame(width: 44, height: 44)
+                            .background(
+                                Circle()
+                                    .fill(Color.white)
+                                    .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
+                            )
                     }
                     
                     Spacer()
                     
-                    Text("Verify Card")
+                    Text("Card Verification")
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.darkBlue)
+                        .matchedGeometryEffect(id: "title", in: animation)
                     
                     Spacer()
                     
@@ -106,111 +137,106 @@ struct CardVerificationView: View {
                         .frame(width: 44, height: 44)
                 }
                 .padding(.horizontal)
-                .padding(.top, 16)
+                .padding(.top, 20)
+                .padding(.bottom, 10)
                 
-                // Card illustration
-                CreditCardIllustration(lastFourDigits: viewModel.lastFourDigits, cvc: viewModel.cvc)
-                    .padding(.vertical, 30)
-                    .scaleEffect(viewModel.showValidationErrors && !viewModel.allFieldsValid ? 1.02 : 1)
-                    .animation(.interactiveSpring(), value: viewModel.showValidationErrors)
+                // Card illustration with 3D tilt effect
+                CardIllustrationView(lastFourDigits: viewModel.lastFourDigits,
+                                     cvc: viewModel.cvc,
+                                     isFocused: viewModel.fieldFocus == .cvc)
+                .rotation3DEffect(
+                    Angle(degrees: Double(cardTilt.width / 10)),
+                    axis: (x: 0, y: 1, z: 0)
+                )
+                .rotation3DEffect(
+                    Angle(degrees: Double(cardTilt.height / 10)),
+                    axis: (x: 1, y: 0, z: 0)
+                )
+                .offset(cardTilt)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            withAnimation(.interactiveSpring()) {
+                                cardTilt = value.translation
+                            }
+                        }
+                        .onEnded { _ in
+                            withAnimation(.spring()) {
+                                cardTilt = .zero
+                            }
+                        }
+                )
+                .padding(.vertical, 30)
+                .scaleEffect(viewModel.showValidationErrors && !viewModel.allFieldsValid ? 1.02 : 1)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.showValidationErrors)
                 
-                // Form fields
+                // Form fields with floating labels
                 VStack(spacing: 24) {
                     // Last 4 digits field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("LAST 4 DIGITS")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color(.systemGray))
-                        
-                        HStack {
-                            TextField("••••", text: $viewModel.lastFourDigits)
-                                .font(.system(size: 18, weight: .medium, design: .monospaced))
-                                .keyboardType(.numberPad)
-                                .padding(.vertical, 14)
-                                .padding(.horizontal, 16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .strokeBorder(
-                                            viewModel.showValidationErrors && !viewModel.lastFourDigitsValid ?
-                                            Color.red : Color(.systemGray4),
-                                            lineWidth: 1.5
-                                        )
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.white)
-                                        )
-                                )
-                                .modifier(ShakeEffect(animatableData: CGFloat(shakeInvalidField && !viewModel.lastFourDigitsValid ? 1 : 0)))
-                                .onChange(of: viewModel.lastFourDigits) { _ in
-                                    if viewModel.showValidationErrors {
-                                        _ = viewModel.validateFields()
-                                    }
-                                }
-                        }
-                        
-                        if viewModel.showValidationErrors && !viewModel.lastFourDigitsValid {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text("Please enter exactly 4 digits")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                Spacer()
+                    FloatingLabelTextField(
+                        label: "Last 4 Digits",
+                        placeholder: "••••",
+                        text: $viewModel.lastFourDigits,
+                        isValid: viewModel.lastFourDigitsValid || !viewModel.showValidationErrors,
+                        onCommit: { viewModel.fieldFocus = .cvc }
+                    )
+                    .keyboardType(.numberPad)
+                    .modifier(ShakeEffect(animatableData: CGFloat(shakeInvalidField && !viewModel.lastFourDigitsValid ? 1 : 0)))
+                    .overlay(
+                        Group {
+                            if viewModel.showValidationErrors && !viewModel.lastFourDigitsValid {
+                                ValidationErrorView(message: "Enter exactly 4 digits")
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .top).combined(with: .opacity),
+                                        removal: .opacity
+                                    ))
                             }
-                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                            .animation(.easeInOut(duration: 0.3), value: viewModel.showValidationErrors)
+                    )
+                    .onTapGesture {
+                        withAnimation {
+                            viewModel.fieldFocus = .lastFourDigits
                         }
                     }
                     
                     // CVC field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("CVC CODE")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color(.systemGray))
-                        
-                        HStack {
-                            SecureField("•••", text: $viewModel.cvc)
-                                .font(.system(size: 18, weight: .medium, design: .monospaced))
-                                .keyboardType(.numberPad)
-                                .padding(.vertical, 14)
-                                .padding(.horizontal, 16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .strokeBorder(
-                                            viewModel.showValidationErrors && !viewModel.cvcValid ?
-                                            Color.red : Color(.systemGray4),
-                                            lineWidth: 1.5
-                                        )
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.white)
-                                        )
-                                )
-                                .modifier(ShakeEffect(animatableData: CGFloat(shakeInvalidField && !viewModel.cvcValid ? 1 : 0)))
-                                .onChange(of: viewModel.cvc) { _ in
-                                    if viewModel.showValidationErrors {
-                                        _ = viewModel.validateFields()
-                                    }
-                                }
-                        }
-                        
-                        if viewModel.showValidationErrors && !viewModel.cvcValid {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text("Please enter exactly 3 digits")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                Spacer()
+                    FloatingLabelTextField(
+                        label: "CVC Code",
+                        placeholder: "•••",
+                        text: $viewModel.cvc,
+                        isValid: viewModel.cvcValid || !viewModel.showValidationErrors,
+                        isSecure: true,
+                        onCommit: { viewModel.save { _ in } }
+                    )
+                    .keyboardType(.numberPad)
+                    .modifier(ShakeEffect(animatableData: CGFloat(shakeInvalidField && !viewModel.cvcValid ? 1 : 0)))
+                    .overlay(
+                        Group {
+                            if viewModel.showValidationErrors && !viewModel.cvcValid {
+                                ValidationErrorView(message: "Enter exactly 3 digits")
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .top).combined(with: .opacity),
+                                        removal: .opacity
+                                    ))
                             }
-                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                            .animation(.easeInOut(duration: 0.3), value: viewModel.showValidationErrors)
+                    )
+                    .onTapGesture {
+                        withAnimation {
+                            viewModel.fieldFocus = .cvc
                         }
                     }
                     
                     Spacer()
                     
-                    // Save button
+                    // Animated save button
                     Button(action: {
                         if viewModel.validateFields() {
+                            withAnimation(.easeInOut(duration: 0.2).repeatCount(2)) {
+                                pulseButton.toggle()
+                            }
                             viewModel.save { success in
                                 if !success {
                                     withAnimation(.default) {
@@ -219,43 +245,56 @@ struct CardVerificationView: View {
                                 }
                             }
                         } else {
-                            withAnimation(.default) {
+                            withAnimation(.interactiveSpring()) {
                                 shakeInvalidField.toggle()
                             }
                         }
                     }) {
                         HStack {
                             if viewModel.isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                LoadingDotsView()
                             } else {
-                                Text("Verify Card")
-                                    .font(.system(size: 18, weight: .semibold))
+                                Text("VERIFY CARD")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .scaleEffect(pulseButton ? 1.05 : 1.0)
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .frame(height: 54)
                         .background(
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.blue, Color.purple]),
-                                startPoint: .leading,
-                                endPoint: .trailing
+                                gradient: Gradient(colors: [
+                                    viewModel.allFieldsValid ? .vibrantBlue : .vibrantBlue.opacity(0.6),
+                                    viewModel.allFieldsValid ? .darkBlue : .darkBlue.opacity(0.6)
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
                             )
                         )
                         .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .shadow(color: Color.blue.opacity(0.3), radius: 10, x: 0, y: 5)
+                        .cornerRadius(14)
+                        .shadow(color: .vibrantBlue.opacity(viewModel.allFieldsValid ? 0.4 : 0.1),
+                                radius: 10, x: 0, y: 5)
+                        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                     }
-                    .disabled(viewModel.isLoading)
-                    .padding(.bottom, 24)
+                    .disabled(!viewModel.allFieldsValid || viewModel.isLoading)
+                    .padding(.top, 20)
+                    .padding(.bottom, 30)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 16)
             }
             
+            // Success overlay with confetti
             if viewModel.isSuccess {
-                SuccessOverlay()
-                    .transition(.opacity.combined(with: .scale))
+                SuccessOverlayView()
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.9)),
+                        removal: .opacity.combined(with: .scale(scale: 1.1))
+                    ))
             }
         }
     }
@@ -263,70 +302,129 @@ struct CardVerificationView: View {
 
 // MARK: - Custom Views
 
-struct CreditCardIllustration: View {
+struct CardIllustrationView: View {
     let lastFourDigits: String
     let cvc: String
+    let isFocused: Bool
     
     var body: some View {
         ZStack {
-            // Card background
+            // Card background with embossed effect
             RoundedRectangle(cornerRadius: 20)
-                .fill(LinearGradient(
-                    gradient: Gradient(colors: [Color(#colorLiteral(red: 0.3254901961, green: 0.4196078431, blue: 0.7764705882, alpha: 1)), Color(#colorLiteral(red: 0.4274509804, green: 0.3176470588, blue: 0.7607843137, alpha: 1))]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.darkBlue, Color.vibrantBlue]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 10)
                 .frame(width: 320, height: 200)
-                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
             
             VStack(alignment: .leading) {
                 HStack {
-                    Image(systemName: "simcard.fill")
-                        .foregroundColor(.white.opacity(0.8))
-                        .font(.system(size: 24))
+                    // Card chip with shine effect
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.warningYellow, Color.orange]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 50, height: 36)
+                        
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .frame(width: 50, height: 36)
+                        
+                        // Chip lines
+                        VStack(spacing: 4) {
+                            ForEach(0..<4, id: \.self) { _ in
+                                Rectangle()
+                                    .fill(Color.black.opacity(0.3))
+                                    .frame(width: 30, height: 2)
+                            }
+                        }
+                    }
                     
                     Spacer()
                     
+                    // Card network logo with shine
                     Text("VISA")
                         .font(.system(size: 24, weight: .bold, design: .serif))
                         .italic()
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                        .overlay(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.white.opacity(0.8), .clear]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .mask(
+                                Text("VISA")
+                                    .font(.system(size: 24, weight: .bold, design: .serif))
+                                    .italic()
+                            )
+                            .offset(y: -10)
+                            .opacity(0.6)
+                        )
                 }
                 
                 Spacer()
                 
-                HStack {
-                    ForEach(0..<3) { _ in
+                // Card number with focus animation
+                HStack(spacing: 12) {
+                    ForEach(0..<3, id: \.self) { _ in
                         Circle()
-                            .frame(width: 6, height: 6)
+                            .frame(width: 8, height: 8)
                             .foregroundColor(.white.opacity(0.8))
                     }
                     
-                    Text("••••")
-                        .font(.system(size: 16, weight: .bold, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.8))
-                        .padding(.leading, 8)
-                    
-                    if !lastFourDigits.isEmpty {
-                        Text(lastFourDigits)
-                            .font(.system(size: 16, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
-                    }
+                    Text(lastFourDigits.isEmpty ? "••••" : "•••• \(lastFourDigits)")
+                        .font(.system(size: 18, weight: .medium, design: .monospaced))
+                        .foregroundColor(.white)
                 }
+                .opacity(isFocused ? 0.6 : 1.0)
+                .animation(.easeInOut(duration: 0.3), value: isFocused)
                 
+                // CVC and expiration with focus highlight
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("CVC")
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white.opacity(0.7))
-                        Text(cvc.isEmpty ? "•••" : "•".repeating(cvc.count) + cvc.suffix(3 - cvc.count))
+                        Text(cvc.isEmpty ? "•••" : cvc)
                             .font(.system(size: 16, weight: .bold, design: .monospaced))
                             .foregroundColor(.white)
+                            .frame(width: 60, height: 24)
+                            .background(
+                                isFocused ? Color.white.opacity(0.2) : Color.clear
+                            )
+                            .cornerRadius(4)
+                            .animation(.easeInOut(duration: 0.3), value: isFocused)
                     }
                     
                     Spacer()
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("EXPIRES")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white.opacity(0.7))
+                        Text("••/••")
+                            .font(.system(size: 16, weight: .medium, design: .monospaced))
+                            .foregroundColor(.white)
+                    }
+                    .opacity(isFocused ? 0.6 : 1.0)
+                    .animation(.easeInOut(duration: 0.3), value: isFocused)
                 }
-                .padding(.top, 8)
+                .padding(.top, 12)
             }
             .padding(25)
             .frame(width: 320, height: 200)
@@ -334,36 +432,254 @@ struct CreditCardIllustration: View {
     }
 }
 
-struct SuccessOverlay: View {
+struct FloatingLabelTextField: View {
+    let label: String
+    let placeholder: String
+    @Binding var text: String
+    var isValid: Bool = true
+    var isSecure: Bool = false
+    var onCommit: () -> Void = {}
+    
+    @State private var isFocused: Bool = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isFocused ? .darkBlue : .gray)
+                .scaleEffect(isFocused || !text.isEmpty ? 1.0 : 1.2)
+                .offset(y: isFocused || !text.isEmpty ? 0 : 22)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused || !text.isEmpty)
+            
+            ZStack(alignment: .leading) {
+                if text.isEmpty && !isFocused {
+                    Text(placeholder)
+                        .font(.system(size: 18, weight: .medium, design: .monospaced))
+                        .foregroundColor(.gray.opacity(0.7))
+                        .offset(y: 1)
+                }
+                
+                if isSecure {
+                    SecureField("", text: $text, onCommit: onCommit)
+                } else {
+                    TextField("", text: $text, onCommit: onCommit)
+                }
+            }
+            .font(.system(size: 18, weight: .medium, design: .monospaced))
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                isFocused ? Color.vibrantBlue :
+                                    isValid ? Color(.systemGray4) : Color.errorRed,
+                                lineWidth: isFocused ? 2 : 1.5
+                            )
+                    )
+                    .shadow(color: isFocused ? Color.vibrantBlue.opacity(0.2) : .clear,
+                            radius: isFocused ? 4 : 0, x: 0, y: 0)
+            )
+            .onTapGesture {
+                isFocused = true
+            }
+        }
+        .onAppear {
+            // Handle keyboard show/hide notifications to update focus state
+            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { _ in
+                withAnimation {
+                    isFocused = true
+                }
+            }
+            
+            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+                withAnimation {
+                    isFocused = false
+                }
+            }
+        }
+    }
+}
+
+struct ValidationErrorView: View {
+    let message: String
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.errorRed)
+                .font(.system(size: 14))
+            
+            Text(message)
+                .foregroundColor(.errorRed)
+                .font(.system(size: 13, weight: .medium))
+            
+            Spacer()
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.errorRed.opacity(0.1))
+        )
+        .offset(y: 8)
+    }
+}
+
+struct LoadingDotsView: View {
+    @State private var animating = false
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<3, id: \.self) { index in
+                Circle()
+                    .frame(width: 8, height: 8)
+                    .foregroundColor(.white)
+                    .opacity(animating ? 0.3 : 1)
+                    .offset(y: animating ? 5 : -5)
+                    .animation(
+                        Animation.easeInOut(duration: 0.6)
+                            .repeatForever()
+                            .delay(Double(index) * 0.2)
+                    )
+            }
+        }
+        .onAppear {
+            animating = true
+        }
+    }
+}
+
+struct SuccessOverlayView: View {
+    @State private var confetti = false
+    
     var body: some View {
         ZStack {
+            // Background dim
             Color.black.opacity(0.5)
                 .edgesIgnoringSafeArea(.all)
             
-            VStack(spacing: 20) {
+            // Confetti particles
+            if confetti {
+                ForEach(0..<30, id: \.self) { _ in
+                    ConfettiParticle()
+                }
+            }
+            
+            // Success card
+            VStack(spacing: 16) {
                 ZStack {
                     Circle()
-                        .fill(Color.green)
+                        .fill(Color.white)
                         .frame(width: 100, height: 100)
+                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     Image(systemName: "checkmark")
-                        .font(.system(size: 50, weight: .bold))
-                        .foregroundColor(.white)
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.successGreen)
+                        .scaleEffect(confetti ? 1.0 : 0.5)
+                        .opacity(confetti ? 1.0 : 0.0)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.5).delay(0.2), value: confetti)
                 }
                 
-                Text("Verified Successfully!")
-                    .font(.system(size: 24, weight: .semibold))
+                Text("Card Verified!")
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(.white)
+                    .opacity(confetti ? 1.0 : 0.0)
+                    .offset(y: confetti ? 0 : 20)
+                    .animation(.easeOut(duration: 0.3).delay(0.3), value: confetti)
+                
+                Text("Your card has been successfully verified")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                    .multilineTextAlignment(.center)
+                    .opacity(confetti ? 1.0 : 0.0)
+                    .offset(y: confetti ? 0 : 20)
+                    .animation(.easeOut(duration: 0.3).delay(0.4), value: confetti)
             }
-            .padding(40)
+            .padding(30)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(.systemBackground))
-                    .shadow(radius: 10)
+                    .fill(Color.darkBlue)
+                    .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
             )
             .padding(40)
         }
-        .zIndex(1)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation {
+                    confetti = true
+                }
+            }
+        }
+    }
+}
+
+struct ConfettiParticle: View {
+    @State private var position: CGPoint = .zero
+    @State private var opacity: Double = 0
+    @State private var rotation: Double = 0
+    @State private var scale: CGFloat = 0
+    
+    let colors: [Color] = [.vibrantBlue, .successGreen, .warningYellow, .errorRed, .white]
+    let shapes: [AnyView] = [
+        AnyView(Circle()),
+        AnyView(Rectangle()),
+        AnyView(Triangle()),
+        AnyView(Diamond())
+    ]
+    
+    var body: some View {
+        let randomColor = colors.randomElement()!
+        let randomShape = shapes.randomElement()!
+        let duration = Double.random(in: 1.5...3.0)
+        
+        randomShape
+            .foregroundColor(randomColor)
+            .frame(width: 10, height: 10)
+            .rotationEffect(.degrees(rotation))
+            .scaleEffect(scale)
+            .position(position)
+            .opacity(opacity)
+            .onAppear {
+                withAnimation(.easeOut(duration: duration)) {
+                    position = CGPoint(
+                        x: CGFloat.random(in: -UIScreen.main.bounds.width/2...UIScreen.main.bounds.width/2),
+                        y: UIScreen.main.bounds.height
+                    )
+                    opacity = 1
+                    rotation = Double.random(in: 0...360)
+                    scale = CGFloat.random(in: 0.5...1.5)
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                    opacity = 0
+                }
+            }
+    }
+}
+
+struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
+        return path
+    }
+}
+
+struct Diamond: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
+        return path
     }
 }
 
@@ -373,14 +689,8 @@ struct ShakeEffect: GeometryEffect {
     var animatableData: CGFloat
     
     func effectValue(size: CGSize) -> ProjectionTransform {
-        let translation = CGFloat(sin(animatableData * .pi * 4)) * 10
+        let translation = CGFloat(sin(animatableData * .pi * 6)) * 8
         return ProjectionTransform(CGAffineTransform(translationX: translation, y: 0))
-    }
-}
-
-extension String {
-    func repeating(_ count: Int) -> String {
-        return String(repeating: self, count: count)
     }
 }
 
@@ -388,6 +698,11 @@ extension String {
 
 struct CardVerificationView_Previews: PreviewProvider {
     static var previews: some View {
-        CardVerificationView()
+        Group {
+            CardVerificationView()
+            
+            CardVerificationView()
+                .preferredColorScheme(.dark)
+        }
     }
 }
