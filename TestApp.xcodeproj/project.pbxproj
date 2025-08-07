@@ -12,6 +12,7 @@
 		050943CA2D4742360046A401 /* FilterTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 050943C52D4742360046A401 /* FilterTableViewCell.xib */; };
 		050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C42D4742360046A401 /* FilterTableViewCell.swift */; };
 		050943CC2D4742360046A401 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050943C62D4742360046A401 /* FilterViewController.swift */; };
+		0520BA682E44640400248C85 /* CardVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0520BA672E44640400248C85 /* CardVerificationView.swift */; };
 		0547E89B2DF96D1900A38877 /* SSSwiftUISpinnerButton in Frameworks */ = {isa = PBXBuildFile; productRef = 0547E89A2DF96D1900A38877 /* SSSwiftUISpinnerButton */; };
 		057E07302E3B8ADC004A60FA /* ConsalidateStockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057E072F2E3B8ADC004A60FA /* ConsalidateStockView.swift */; };
 		05A41A102E41CBC200B5457B /* ImagePreviewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A41A0F2E41CBC200B5457B /* ImagePreviewer.swift */; };
@@ -31,6 +32,7 @@
 		050943C52D4742360046A401 /* FilterTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterTableViewCell.xib; sourceTree = "<group>"; };
 		050943C62D4742360046A401 /* FilterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		050943C72D4742360046A401 /* FilterViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FilterViewController.xib; sourceTree = "<group>"; };
+		0520BA672E44640400248C85 /* CardVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardVerificationView.swift; sourceTree = "<group>"; };
 		05227B592DDF189A007DB8FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		057E072F2E3B8ADC004A60FA /* ConsalidateStockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsalidateStockView.swift; sourceTree = "<group>"; };
 		05A41A0F2E41CBC200B5457B /* ImagePreviewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreviewer.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 				DDB902FD2BF36CCF00A2FF5A /* TestApp.entitlements */,
 				DDB902FE2BF36CCF00A2FF5A /* Preview Content */,
 				05A41A0F2E41CBC200B5457B /* ImagePreviewer.swift */,
+				0520BA672E44640400248C85 /* CardVerificationView.swift */,
 			);
 			path = TestApp;
 			sourceTree = "<group>";
@@ -206,6 +209,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDB902F82BF36CCD00A2FF5A /* TestAppApp.swift in Sources */,
+				0520BA682E44640400248C85 /* CardVerificationView.swift in Sources */,
 				05A41A102E41CBC200B5457B /* ImagePreviewer.swift in Sources */,
 				050943CB2D4742360046A401 /* FilterTableViewCell.swift in Sources */,
 				050943CC2D4742360046A401 /* FilterViewController.swift in Sources */,

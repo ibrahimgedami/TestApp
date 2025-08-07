@@ -13,7 +13,7 @@ struct TestAppApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                ProductSearchView()
+                CardVerificationView()
             }
         }
     }

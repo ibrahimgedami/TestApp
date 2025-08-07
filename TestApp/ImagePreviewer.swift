@@ -8,8 +8,7 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-// MARK: - ViewModel
-public class ImageViewerViewModel: ObservableObject {
+class ImageViewerViewModel: ObservableObject {
     
     @Published public var imageData: Data?
     @Published public var isLoading = true
@@ -106,15 +105,13 @@ public struct ImageViewer: View {
             .onTapGesture {
                 isShowingFullScreen = true
             }
-            .accessibilityLabel("Image thumbnail")
-            .accessibilityAddTraits(.isButton)
     }
+    
 }
 
-// MARK: - Full Screen View
-public struct FullScreenImageView: View {
+struct FullScreenImageView: View {
     
-    public let image: UIImage
+    let image: UIImage
     @Environment(\.dismiss) var dismiss
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
@@ -125,7 +122,7 @@ public struct FullScreenImageView: View {
         self.image = image
     }
     
-    public var body: some View {
+    var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             
@@ -178,7 +175,6 @@ public struct FullScreenImageView: View {
                             }
                         }
                 )
-                .accessibilityLabel("Full screen image")
                 .accessibilityZoomAction { action in
                     if action.direction == .zoomIn {
                         withAnimation { scale *= 1.5 }
@@ -203,7 +199,6 @@ public struct FullScreenImageView: View {
                         .foregroundColor(.white)
                         .padding()
                 }
-                .accessibilityLabel("Close full screen")
             }
             Spacer()
         }
