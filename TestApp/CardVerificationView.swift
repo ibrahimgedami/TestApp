@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// Custom color palette
+
 extension Color {
     
     static let darkBlue = Color(red: 0.1, green: 0.2, blue: 0.4)
@@ -68,38 +68,41 @@ class CardVerificationViewModel: ObservableObject {
         return allFieldsValid
     }
     
-    func save(completion: @escaping (Bool) -> Void) {
+    func save(completion: @escaping (Bool, String, String) -> Void) {
         if validateFields() {
             isLoading = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 self.isLoading = false
                 self.isSuccess = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    completion(true)
-                }
+                completion(true, self.lastFourDigits, self.cvc)
             }
         } else {
-            completion(false)
+            completion(false, "", "")
         }
     }
 }
 
 struct CardVerificationView: View {
+    
     @StateObject private var viewModel = CardVerificationViewModel()
     @Environment(\.dismiss) var dismiss
     @State private var shakeInvalidField: Bool = false
     @State private var pulseButton = false
     @State private var cardTilt = CGSize.zero
     @Namespace private var animation
+    var onVerificationComplete: ((Bool, String, String) -> Void)?
+    
+    init(onVerificationComplete: ((Bool, String, String) -> Void)? = nil) {
+        self.onVerificationComplete = onVerificationComplete
+    }
     
     var body: some View {
         ZStack {
-            // Background with subtle texture
             Color.lightBlue
                 .edgesIgnoringSafeArea(.all)
                 .overlay(
                     Image(systemName: "square.stack.3d.up.fill")
-                        .foregroundColor(.white.opacity(0.1))
+                        .foregroundStyle(.white.opacity(0.1))
                         .font(.system(size: 300))
                         .offset(x: 100, y: -100)
                 )
@@ -112,7 +115,7 @@ struct CardVerificationView: View {
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.darkBlue)
+                            .foregroundStyle(.blue)
                             .frame(width: 44, height: 44)
                             .background(
                                 Circle()
@@ -125,21 +128,19 @@ struct CardVerificationView: View {
                     
                     Text("Card Verification")
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.darkBlue)
+                        .foregroundStyle(.blue)
                         .matchedGeometryEffect(id: "title", in: animation)
                     
                     Spacer()
                     
-                    // Invisible spacer to balance the HStack
                     Rectangle()
-                        .foregroundColor(.clear)
+                        .foregroundStyle(.clear)
                         .frame(width: 44, height: 44)
                 }
                 .padding(.horizontal)
                 .padding(.top, 20)
                 .padding(.bottom, 10)
                 
-                // Card illustration with 3D tilt effect
                 CardIllustrationView(lastFourDigits: viewModel.lastFourDigits,
                                      cvc: viewModel.cvc,
                                      isFocused: viewModel.fieldFocus == .cvc)
@@ -205,7 +206,9 @@ struct CardVerificationView: View {
                         text: $viewModel.cvc,
                         isValid: viewModel.cvcValid || !viewModel.showValidationErrors,
                         isSecure: true,
-                        onCommit: { viewModel.save { _ in } }
+                        onCommit: { viewModel.save { success, last4, cvc in
+                            onVerificationComplete?(success, last4, cvc)
+                        } }
                     )
                     .keyboardType(.numberPad)
                     .modifier(ShakeEffect(animatableData: CGFloat(shakeInvalidField && !viewModel.cvcValid ? 1 : 0)))
@@ -235,8 +238,10 @@ struct CardVerificationView: View {
                             withAnimation(.easeInOut(duration: 0.2).repeatCount(2)) {
                                 pulseButton.toggle()
                             }
-                            viewModel.save { success in
-                                if !success {
+                            viewModel.save { success, last4, cvc in
+                                if success {
+                                    onVerificationComplete?(success, last4, cvc)
+                                } else {
                                     withAnimation(.default) {
                                         shakeInvalidField.toggle()
                                     }
@@ -273,7 +278,7 @@ struct CardVerificationView: View {
                                     .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
                             )
                         )
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .cornerRadius(14)
                         .shadow(color: .vibrantBlue.opacity(viewModel.allFieldsValid ? 0.4 : 0.1),
                                 radius: 10, x: 0, y: 5)
@@ -285,20 +290,10 @@ struct CardVerificationView: View {
                 }
                 .padding(.horizontal, 24)
             }
-            
-            // Success overlay with confetti
-            if viewModel.isSuccess {
-                SuccessOverlayView()
-                    .transition(.asymmetric(
-                        insertion: .opacity.combined(with: .scale(scale: 0.9)),
-                        removal: .opacity.combined(with: .scale(scale: 1.1))
-                    ))
-            }
         }
     }
 }
 
-// MARK: - Custom Views
 
 struct CardIllustrationView: View {
     let lastFourDigits: String
@@ -357,7 +352,7 @@ struct CardIllustrationView: View {
                     Text("VISA")
                         .font(.system(size: 24, weight: .bold, design: .serif))
                         .italic()
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                         .overlay(
                             LinearGradient(
@@ -382,25 +377,24 @@ struct CardIllustrationView: View {
                     ForEach(0..<3, id: \.self) { _ in
                         Circle()
                             .frame(width: 8, height: 8)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundStyle(.white.opacity(0.8))
                     }
                     
                     Text(lastFourDigits.isEmpty ? "••••" : "•••• \(lastFourDigits)")
                         .font(.system(size: 18, weight: .medium, design: .monospaced))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
                 .opacity(isFocused ? 0.6 : 1.0)
                 .animation(.easeInOut(duration: 0.3), value: isFocused)
                 
-                // CVC and expiration with focus highlight
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("CVC")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundStyle(.white.opacity(0.7))
                         Text(cvc.isEmpty ? "•••" : cvc)
                             .font(.system(size: 16, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .frame(width: 60, height: 24)
                             .background(
                                 isFocused ? Color.white.opacity(0.2) : Color.clear
@@ -414,10 +408,10 @@ struct CardIllustrationView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("EXPIRES")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundStyle(.white.opacity(0.7))
                         Text("••/••")
                             .font(.system(size: 16, weight: .medium, design: .monospaced))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
                     .opacity(isFocused ? 0.6 : 1.0)
                     .animation(.easeInOut(duration: 0.3), value: isFocused)
@@ -445,7 +439,7 @@ struct FloatingLabelTextField: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(isFocused ? .darkBlue : .gray)
+                .foregroundStyle(isFocused ? .blue : .gray)
                 .scaleEffect(isFocused || !text.isEmpty ? 1.0 : 1.2)
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused || !text.isEmpty)
             
@@ -453,7 +447,7 @@ struct FloatingLabelTextField: View {
                 if text.isEmpty && !isFocused {
                     Text(placeholder)
                         .font(.system(size: 18, weight: .medium, design: .monospaced))
-                        .foregroundColor(.gray.opacity(0.7))
+                        .foregroundStyle(.gray.opacity(0.7))
                         .offset(y: 1)
                 }
                 
@@ -508,11 +502,11 @@ struct ValidationErrorView: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.errorRed)
+                .foregroundStyle(.red)
                 .font(.system(size: 14))
             
             Text(message)
-                .foregroundColor(.errorRed)
+                .foregroundStyle(.red)
                 .font(.system(size: 13, weight: .medium))
             
             Spacer()
@@ -527,6 +521,7 @@ struct ValidationErrorView: View {
 }
 
 struct LoadingDotsView: View {
+    
     @State private var animating = false
     
     var body: some View {
@@ -534,7 +529,7 @@ struct LoadingDotsView: View {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
                     .frame(width: 8, height: 8)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .opacity(animating ? 0.3 : 1)
                     .offset(y: animating ? 5 : -5)
                     .animation(
@@ -548,160 +543,22 @@ struct LoadingDotsView: View {
             animating = true
         }
     }
-}
-
-struct SuccessOverlayView: View {
-    @State private var confetti = false
     
-    var body: some View {
-        ZStack {
-            // Background dim
-            Color.black.opacity(0.5)
-                .edgesIgnoringSafeArea(.all)
-            
-            // Confetti particles
-            if confetti {
-                ForEach(0..<30, id: \.self) { _ in
-                    ConfettiParticle()
-                }
-            }
-            
-            // Success card
-            VStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 100, height: 100)
-                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-                    
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(.successGreen)
-                        .scaleEffect(confetti ? 1.0 : 0.5)
-                        .opacity(confetti ? 1.0 : 0.0)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.5).delay(0.2), value: confetti)
-                }
-                
-                Text("Card Verified!")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
-                    .opacity(confetti ? 1.0 : 0.0)
-                    .offset(y: confetti ? 0 : 20)
-                    .animation(.easeOut(duration: 0.3).delay(0.3), value: confetti)
-                
-                Text("Your card has been successfully verified")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
-                    .multilineTextAlignment(.center)
-                    .opacity(confetti ? 1.0 : 0.0)
-                    .offset(y: confetti ? 0 : 20)
-                    .animation(.easeOut(duration: 0.3).delay(0.4), value: confetti)
-            }
-            .padding(30)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.darkBlue)
-                    .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-            )
-            .padding(40)
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation {
-                    confetti = true
-                }
-            }
-        }
-    }
 }
-
-struct ConfettiParticle: View {
-    @State private var position: CGPoint = .zero
-    @State private var opacity: Double = 0
-    @State private var rotation: Double = 0
-    @State private var scale: CGFloat = 0
-    
-    let colors: [Color] = [.vibrantBlue, .successGreen, .warningYellow, .errorRed, .white]
-    let shapes: [AnyView] = [
-        AnyView(Circle()),
-        AnyView(Rectangle()),
-        AnyView(Triangle()),
-        AnyView(Diamond())
-    ]
-    
-    var body: some View {
-        let randomColor = colors.randomElement()!
-        let randomShape = shapes.randomElement()!
-        let duration = Double.random(in: 1.5...3.0)
-        
-        randomShape
-            .foregroundColor(randomColor)
-            .frame(width: 10, height: 10)
-            .rotationEffect(.degrees(rotation))
-            .scaleEffect(scale)
-            .position(position)
-            .opacity(opacity)
-            .onAppear {
-                withAnimation(.easeOut(duration: duration)) {
-                    position = CGPoint(
-                        x: CGFloat.random(in: -UIScreen.main.bounds.width/2...UIScreen.main.bounds.width/2),
-                        y: UIScreen.main.bounds.height
-                    )
-                    opacity = 1
-                    rotation = Double.random(in: 0...360)
-                    scale = CGFloat.random(in: 0.5...1.5)
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                    opacity = 0
-                }
-            }
-    }
-}
-
-struct Triangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
-        return path
-    }
-}
-
-struct Diamond: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
-        return path
-    }
-}
-
-// MARK: - Animations
 
 struct ShakeEffect: GeometryEffect {
+    
     var animatableData: CGFloat
     
     func effectValue(size: CGSize) -> ProjectionTransform {
         let translation = CGFloat(sin(animatableData * .pi * 6)) * 8
         return ProjectionTransform(CGAffineTransform(translationX: translation, y: 0))
     }
+    
 }
 
-// MARK: - Preview
-
-struct CardVerificationView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            CardVerificationView()
-            
-            CardVerificationView()
-                .preferredColorScheme(.dark)
-        }
+#Preview {
+    CardVerificationView { isSuccess, last4, cvc in
+        
     }
 }
