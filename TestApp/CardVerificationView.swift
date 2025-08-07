@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-import SwiftUI
-
 // Custom color palette
 extension Color {
+    
     static let darkBlue = Color(red: 0.1, green: 0.2, blue: 0.4)
     static let vibrantBlue = Color(red: 0.2, green: 0.5, blue: 1.0)
     static let lightBlue = Color(red: 0.9, green: 0.95, blue: 1.0)
     static let successGreen = Color(red: 0.2, green: 0.8, blue: 0.4)
     static let warningYellow = Color(red: 1.0, green: 0.8, blue: 0.2)
     static let errorRed = Color(red: 1.0, green: 0.3, blue: 0.3)
+    
 }
 
 class CardVerificationViewModel: ObservableObject {
@@ -71,7 +71,6 @@ class CardVerificationViewModel: ObservableObject {
     func save(completion: @escaping (Bool) -> Void) {
         if validateFields() {
             isLoading = true
-            // Simulate network request
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 self.isLoading = false
                 self.isSuccess = true
@@ -87,7 +86,7 @@ class CardVerificationViewModel: ObservableObject {
 
 struct CardVerificationView: View {
     @StateObject private var viewModel = CardVerificationViewModel()
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
     @State private var shakeInvalidField: Bool = false
     @State private var pulseButton = false
     @State private var cardTilt = CGSize.zero
@@ -109,7 +108,7 @@ struct CardVerificationView: View {
                 // Header
                 HStack {
                     Button(action: {
-                        presentationMode.wrappedValue.dismiss()
+                        dismiss()
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 18, weight: .bold))
@@ -170,8 +169,7 @@ struct CardVerificationView: View {
                 .scaleEffect(viewModel.showValidationErrors && !viewModel.allFieldsValid ? 1.02 : 1)
                 .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.showValidationErrors)
                 
-                // Form fields with floating labels
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     // Last 4 digits field
                     FloatingLabelTextField(
                         label: "Last 4 Digits",
@@ -323,11 +321,11 @@ struct CardIllustrationView: View {
                         .stroke(Color.white.opacity(0.2), lineWidth: 1)
                 )
                 .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 10)
-                .frame(width: 320, height: 200)
+                .frame(width: .infinity, height: 200)
+                .padding(.horizontal)
             
             VStack(alignment: .leading) {
                 HStack {
-                    // Card chip with shine effect
                     ZStack {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(
@@ -433,6 +431,7 @@ struct CardIllustrationView: View {
 }
 
 struct FloatingLabelTextField: View {
+    
     let label: String
     let placeholder: String
     @Binding var text: String
@@ -443,12 +442,11 @@ struct FloatingLabelTextField: View {
     @State private var isFocused: Bool = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(isFocused ? .darkBlue : .gray)
                 .scaleEffect(isFocused || !text.isEmpty ? 1.0 : 1.2)
-                .offset(y: isFocused || !text.isEmpty ? 0 : 22)
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused || !text.isEmpty)
             
             ZStack(alignment: .leading) {
@@ -501,6 +499,7 @@ struct FloatingLabelTextField: View {
             }
         }
     }
+    
 }
 
 struct ValidationErrorView: View {
